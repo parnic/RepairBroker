@@ -1,0 +1,13 @@
+## Interface: 30000
+## Title: Repair Broker
+## Notes: Auto repair + shows durability.
+## Author: Merl @ chainwet.net
+## Version: @project-version@
+## DefaultState: enabled
+## SavedVariables: RepairBrokerDB
+
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+libs\LibTooltip-1.0\LibTooltip-1.0.lua
+RepairBroker.lua
