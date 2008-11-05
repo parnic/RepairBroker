@@ -10,6 +10,7 @@ local Repair = LibDataBroker:NewDataObject(name, {
 	}
 )
 
+local tooltipRefresh = true
 local print = function(msg) print("|cFF5555AA"..name..": |cFFAAAAFF"..msg) end
 
 local slots = { }
@@ -25,7 +26,7 @@ local OnLoad = function()
 	if not RepairBrokerDB then
 		RepairBrokerDB = {
 			autoRepair = 1,     -- nil or 1
-			useBuildBank = nil, -- nil or 1
+			useGuildBank = nil, -- nil or 1
 		}
 	end
 end
@@ -71,22 +72,23 @@ end
 -- Durability updates and repair
 ---------------------------------
 local UpdateDurability = function()
-	local dur, max
+	local dur, durPerc, max
 	local minDur = 1
+	local anyChanges = false
 	for i,info in ipairs(slots) do
+		durPerc = -1
 		if GetInventoryItemLink("player", info[1]) then
 			dur, max = GetInventoryItemDurability(info[1])
-			if not dur or max == 0 then
-				info[3] = -1
-			else
-				info[3] = dur/max
-				if info[3] < minDur then minDur = info[3] end
+			if dur and max > 0 then
+				durPerc = dur/max
+				if durPerc < minDur then minDur = durPerc end
 			end
-		else
-			info[3] = -1
 		end
+		if info[3] ~= durPerc then anyChanges = true end
+		info[3] = durPerc
 	end
 	Repair.text = DurabilityColor(minDur)..math.floor(minDur*100).."%"
+	return anyChanges
 end
 
 local AutoRepair = function()
@@ -95,18 +97,20 @@ local AutoRepair = function()
 	if not canRepair or cost == 0 then return end
 	
 	-- Use guildbank to repair
-	if CanWithdrawGuildBankMoney() and RepairBrokerDB.useBuildBank and GetGuildBankMoney() >= cost then
+	if CanWithdrawGuildBankMoney() and RepairBrokerDB.useGuildBank and GetGuildBankMoney() >= cost then
 		RepairAllItems(1)
+		print("Repaired for "..CopperToString(cost).." (Guild bank)")
 	elseif GetMoney() >= cost then -- Repair the old fashion way
 		RepairAllItems()
 		print("Repaired for "..CopperToString(cost))
 	else
-		print("Unable to AutoRepair, you need "..CopperToString(cost - GetMoney()).." more.")
+		print("Unable to AutoRepair, you need "..CopperToString(cost - GetMoney()))
 	end
 end
 
 local OnEvent = function(_, event, ...)
 	if event ~= "MERCHANT_SHOW" then
+		tooltipRefresh = true
 		UpdateDurability()
 	else
 		AutoRepair()
@@ -132,16 +136,26 @@ end)
 -- TOOLTIP
 ---------------------------------
 local tooltip = nil
+local TEXT_COLOR = "|cFFAAAAAA"
 
-function Repair:OnEnter()
-	if tooltip then Repair:OnLeave() end
-	UpdateDurability()
-	tooltip = LibTooltip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
-	tooltip:AddHeader("Equipted items")
+local TooltipSavedVars = function()
+	tooltip:AddHeader(" ")
+	tooltip:AddHeader("Auto repair:")
+	tooltip:AddLine(TEXT_COLOR.."Force update", " ", "LeftMouse")
+	tooltip:AddLine(TEXT_COLOR.."Toggle auto-repair", " ", "RightMouse")
+	tooltip:AddLine(TEXT_COLOR.."Toggle guild bank-repair", " ", "MiddleMouse")
+end
+
+local TooltipEquiptedItems = function()
 	local dur, totalCost, cost = 0, 0, nil
-	local gray = "|cFFAAAAAA"
+	
+	tooltip:AddHeader("Equipted items")
+	
 	for i,info in ipairs(slots) do
+		-- Durability in %
 		dur = math.floor(info[3]*100)
+		
+		-- Add some color
 		if dur >= 0 then
 			dur = DurabilityColor(info[3])..dur
 			dur = dur.."%"
@@ -149,15 +163,23 @@ function Repair:OnEnter()
 			dur = DurabilityColor(-1).."-  "
 		end
 		
+		-- Find the repair cost
 		cost = select(3, GameTooltip:SetInventoryItem("player", info[1]))
+		
+		-- Set row in the tooltip
 		tooltip:AddLine(
-			gray..info[2],	-- Slot
-			dur,		-- Dur
+			TEXT_COLOR..info[2], -- Slot
+			dur,		         -- Dur
 			CopperToString(cost) -- Cost
 		)
+		
+		-- Add to total cost
 		if cost and cost > 0 then totalCost = totalCost + cost end
 	end
+	return totalCost
+end
 
+local TooltipBagItems = function()
 	local cost, dur, maxDur = 0, 1, 1
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
@@ -171,38 +193,86 @@ function Repair:OnEnter()
 		end
 	end
 	GameTooltip:Hide()
+	
 	local averageDur = dur/maxDur
+	
+	-- Some space and the actual text
 	tooltip:AddHeader(" ")
 	tooltip:AddHeader("Inventory")
 	tooltip:AddLine(
-		gray.."Items in your bags",  -- Slot
+		TEXT_COLOR.."Items in your bags",                             -- Slot
 		DurabilityColor(averageDur)..math.floor(100*averageDur).."%", -- Dur
-		CopperToString(cost) -- Cost
+		CopperToString(cost)                                          -- Cost
 	)
-	if cost and cost > 0 then totalCost = totalCost + cost end
-	
-	if totalCost > 0 then
+	return cost or 0
+end
+
+local TooltipRepairCost = function(cost)
+	if cost > 0 then
 		tooltip:AddHeader(" ")
 		tooltip:AddHeader("Total cost")
 
 		local m = 1
 		for i=4, 8 do
 			tooltip:AddLine(
-				gray.._G["FACTION_STANDING_LABEL"..i],  -- Slot
-				" ", -- Dur
-				CopperToString(math.floor(totalCost*m+.5)) -- Cost
+				TEXT_COLOR.._G["FACTION_STANDING_LABEL"..i], -- Slot
+				" ",                                         -- Dur
+				CopperToString(math.floor(cost*m+.5))        -- Cost
 			)
 			m = m - .05
 		end
 	end
+end
+
+function Repair:OnEnter(forceUpdate)
+	local durUpdate = UpdateDurability() or tooltipRefresh
 	
-	tooltip:SmartAnchorTo(self)
+	if tooltip then
+		-- Allways update on force
+		if forceUpdate or durUpdate then
+			tooltip:Clear()
+		else
+			tooltip:Show()
+			tooltip:SmartAnchorTo(self)
+			return
+		end
+	else
+		-- Generate tooltip
+		tooltip = LibTooltip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
+	end
+	
+	-- Equipment dur/cost
+	local equiptedCost = TooltipEquiptedItems()
+	
+	-- Inventory dur/cost
+	local bagsCost = (not InCombatLockdown() and TooltipBagItems()) or 0
+	
+	-- Total repair costs
+	TooltipRepairCost(equiptedCost + bagsCost)
+	
+	-- Mouse actions
+	if not InCombatLockdown() then TooltipSavedVars() end
+
 	tooltip:Show()
+	tooltipRefresh = InCombatLockdown() -- Re-draw if we were in combat
+	if not forceUpdate then tooltip:SmartAnchorTo(self) end
 end
 
 function Repair:OnLeave()
 	if not tooltip then return end
-	tooltip:Clear()
-	LibTooltip:Release(tooltip)
-	tooltip = nil
+	tooltip:Hide()
+end
+
+function Repair:OnClick(button)
+	if button == "RightButton" then
+		RepairBrokerDB.autoRepair = not RepairBrokerDB.autoRepair
+		print("Auto-repair "..(RepairBrokerDB.autoRepair and "|cFF00FF00Enabled" or "|cFFFF0000Disabled"))
+	elseif button == "MiddleButton" then
+		RepairBrokerDB.useGuildBank = not RepairBrokerDB.useGuildBank
+		print("Guild bank-repair "..(RepairBrokerDB.useGuildBank and "|cFF00FF00Enabled" or "|cFFFF0000Disabled"))
+	else
+		print("|cFF00FF00Force durability check.")
+		Repair:OnEnter(true)
+	end
+	tooltip:Show()
 end
