@@ -1,0 +1,25 @@
+--by tnt2ray@gmail.com
+local L = LibStub:GetLibrary("AceLocale-3.0"):NewLocale("RepairBroker", "zhTW" )
+if not L then return end
+
+L["RepairBroker"] = "RepairBroker"
+L["Dur"] = "耐久度"
+L["Repaired for "] = "修理花費"
+L[" (Guild bank)"] = "（公會銀行）"
+L["Unable to AutoRepair, you need "] = "無法自動修理，資金不足，你還需要"
+L["Auto repair:"] = "自動修理："
+L["Force update"] = "強制更新"
+L["LeftMouse"] = "滑鼠左鍵"
+L["Toggle auto-repair"] = "開始/關閉 自動修理"
+L["RightMouse"] = "滑鼠右鍵"
+L["Toggle guild bank-repair"] = "開始/關閉 公會銀行修理"
+L["MiddleMouse"] = "滑鼠中鍵"
+L["Equipted items"] = "已裝備的物品"
+L["Inventory"] = "背包"
+L["Items in your bags"] = "背包中的物品"
+L["Total cost"] = "總共花費"
+L["Auto-repair "] = "自動修理"
+L["Enabled"] = "開啟"
+L["Disabled"] = "關閉"
+L["Guild bank-repair "] = "公會銀行修理"
+L["Force durability check."] = "強制耐久檢查"

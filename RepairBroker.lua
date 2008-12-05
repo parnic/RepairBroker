@@ -1,11 +1,11 @@
 local LibTooltip = LibStub('LibTooltip-1.0')
 local LibDataBroker = LibStub('LibDataBroker-1.1')
 if not LibDataBroker then return end
-
-local name = "RepairBroker"
+local L = LibStub:GetLibrary( "AceLocale-3.0" ):GetLocale("RepairBroker" )
+local name = L["RepairBroker"]
 local Repair = LibDataBroker:NewDataObject(name, {
 	icon = "Interface\\Icons\\Trade_BlackSmithing",
-	label = "Dur",
+	label = L["Dur"],
 	text = "100%",
 	}
 )
@@ -99,12 +99,12 @@ local AutoRepair = function()
 	-- Use guildbank to repair
 	if CanWithdrawGuildBankMoney() and RepairBrokerDB.useGuildBank and GetGuildBankMoney() >= cost then
 		RepairAllItems(1)
-		print("Repaired for "..CopperToString(cost).." (Guild bank)")
+		print(L["Repaired for "]..CopperToString(cost)..L[" (Guild bank)"])
 	elseif GetMoney() >= cost then -- Repair the old fashion way
 		RepairAllItems()
-		print("Repaired for "..CopperToString(cost))
+		print(L["Repaired for "]..CopperToString(cost))
 	else
-		print("Unable to AutoRepair, you need "..CopperToString(cost - GetMoney()))
+		print(L["Unable to AutoRepair, you need "]..CopperToString(cost - GetMoney()))
 	end
 end
 
@@ -140,16 +140,16 @@ local TEXT_COLOR = "|cFFAAAAAA"
 
 local TooltipSavedVars = function()
 	tooltip:AddHeader(" ")
-	tooltip:AddHeader("Auto repair:")
-	tooltip:AddLine(TEXT_COLOR.."Force update", " ", "LeftMouse")
-	tooltip:AddLine(TEXT_COLOR.."Toggle auto-repair", " ", "RightMouse")
-	tooltip:AddLine(TEXT_COLOR.."Toggle guild bank-repair", " ", "MiddleMouse")
+	tooltip:AddHeader(L["Auto repair:"])
+	tooltip:AddLine(TEXT_COLOR..L["Force update"], " ", L["LeftMouse"])
+	tooltip:AddLine(TEXT_COLOR..L["Toggle auto-repair"], " ", L["RightMouse"])
+	tooltip:AddLine(TEXT_COLOR..L["Toggle guild bank-repair"], " ", L["MiddleMouse"])
 end
 
 local TooltipEquiptedItems = function()
 	local dur, totalCost, cost = 0, 0, nil
 	
-	tooltip:AddHeader("Equipted items")
+	tooltip:AddHeader(L["Equipted items"])
 	
 	for i,info in ipairs(slots) do
 		-- Durability in %
@@ -198,9 +198,9 @@ local TooltipBagItems = function()
 	
 	-- Some space and the actual text
 	tooltip:AddHeader(" ")
-	tooltip:AddHeader("Inventory")
+	tooltip:AddHeader(L["Inventory"])
 	tooltip:AddLine(
-		TEXT_COLOR.."Items in your bags",                             -- Slot
+		TEXT_COLOR..L["Items in your bags"],                             -- Slot
 		DurabilityColor(averageDur)..math.floor(100*averageDur).."%", -- Dur
 		CopperToString(cost)                                          -- Cost
 	)
@@ -210,7 +210,7 @@ end
 local TooltipRepairCost = function(cost)
 	if cost > 0 then
 		tooltip:AddHeader(" ")
-		tooltip:AddHeader("Total cost")
+		tooltip:AddHeader(L["Total cost"])
 
 		local m = 1
 		for i=4, 8 do
@@ -266,12 +266,12 @@ end
 function Repair:OnClick(button)
 	if button == "RightButton" then
 		RepairBrokerDB.autoRepair = not RepairBrokerDB.autoRepair
-		print("Auto-repair "..(RepairBrokerDB.autoRepair and "|cFF00FF00Enabled" or "|cFFFF0000Disabled"))
+		print(L["Auto-repair "]..(RepairBrokerDB.autoRepair and "|cFF00FF00"..L["Enabled"] or "|cFFFF0000"..L["Disabled"]))
 	elseif button == "MiddleButton" then
 		RepairBrokerDB.useGuildBank = not RepairBrokerDB.useGuildBank
-		print("Guild bank-repair "..(RepairBrokerDB.useGuildBank and "|cFF00FF00Enabled" or "|cFFFF0000Disabled"))
+		print(L["Guild bank-repair "]..(RepairBrokerDB.useGuildBank and "|cFF00FF00"..L["Enabled"] or "|cFFFF0000"..L["Disabled"]))
 	else
-		print("|cFF00FF00Force durability check.")
+		print("|cFF00FF00"..L["Force durability check."])
 		Repair:OnEnter(true)
 	end
 	tooltip:Show()

@@ -3,6 +3,7 @@
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net
 ## Version: @project-version@
+## OptionalDeps: Ace3, Fortress, LibTooltip
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
 
@@ -10,4 +11,10 @@ libs\LibStub\LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 libs\LibTooltip-1.0\LibTooltip-1.0.lua
+libs\AceLocale-3.0\AceLocale-3.0.xml
+
+Locales\enUS.lua
+Locales\zhCN.lua
+Locales\zhTW.lua
+
 RepairBroker.lua
