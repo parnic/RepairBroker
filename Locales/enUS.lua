@@ -23,3 +23,4 @@ L["Enabled"] = true
 L["Disabled"] = true
 L["Guild bank-repair "] = true
 L["Force durability check."] = true
+L["Loading"] = true

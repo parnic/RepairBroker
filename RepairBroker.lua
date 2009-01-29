@@ -1,4 +1,4 @@
-local LibTooltip = LibStub('LibTooltip-1.0')
+local LibQTip = LibStub('LibQTip-1.0')
 local LibDataBroker = LibStub('LibDataBroker-1.1')
 if not LibDataBroker then return end
 local L = LibStub:GetLibrary( "AceLocale-3.0" ):GetLocale("RepairBroker" )
@@ -10,6 +10,8 @@ local Repair = LibDataBroker:NewDataObject(name, {
 	}
 )
 
+local equiptedCost = 0
+local inventoryCost = 0
 local tooltipRefresh = true
 local print = function(msg) print("|cFF5555AA"..name..": |cFFAAAAFF"..msg) end
 
@@ -52,17 +54,17 @@ end
 local CopperToString = function(c)
 	local str = ""
 	if not c or c < 0 then return str end
-	if c > 10000 then
+	if c >= 10000 then
 		local g = math.floor(c/10000)
 		c = c - g*10000
 		str = str.."|cFFFFD800"..g.." |TInterface\\MoneyFrame\\UI-GoldIcon.blp:0:0:0:0|t "
 	end
-	if c > 100 then
+	if c >= 100 then
 		local s = math.floor(c/100)
 		c = c - s*100
 		str = str.."|cFFC7C7C7"..s.." |TInterface\\MoneyFrame\\UI-SilverIcon.blp:0:0:0:0|t "
 	end
-	if c > 0 then
+	if c >= 0 then
 		str = str.."|cFFEEA55F"..c.." |TInterface\\MoneyFrame\\UI-CopperIcon.blp:0:0:0:0|t "
 	end
 	return str
@@ -179,32 +181,76 @@ local TooltipEquiptedItems = function()
 	return totalCost
 end
 
-local TooltipBagItems = function()
+
+--[[
+	Initial code, needs refactoring
+--]]
+local UpdateInventoryCost, TooltipBagItems
+do
+	local gSlot, gBag = 0, 0
 	local cost, dur, maxDur = 0, 1, 1
-	for bag = 0, 4 do
-		for slot = 1, GetContainerNumSlots(bag) do
-			-- Cost
-			local _, repairCost = GameTooltip:SetBagItem(bag, slot)
-			if repairCost then cost = cost + repairCost end
-			
-			-- Dur
-			d, m = GetContainerItemDurability(bag, slot)
-			if d and m then dur = dur + d; maxDur = maxDur + m end
+	local f = CreateFrame("Frame")
+	local updateRunning = false
+	local nextUpdateInventory = 0
+
+	local UpdatePartialInventoryCost = function()
+		--print("Space: " .. (gSlot or 0) .. " - " .. (gBag or 1))
+		local endLoop = GetTime() + .01
+		for bag = gBag or 0, 4 do
+			gBag = bag
+			--print("slot: " .. gSlot)
+			for slot = gSlot or 1, GetContainerNumSlots(bag) do
+				gSlot = slot
+				--print(bag .. " / " .. slot)
+				if endLoop < GetTime() then return end -- Stop loop
+				-- Cost
+				local _, repairCost = GameTooltip:SetBagItem(bag, slot)
+				if repairCost then cost = cost + repairCost end
+				
+				-- Dur
+				d, m = GetContainerItemDurability(bag, slot)
+				if d and m then dur = dur + d; maxDur = maxDur + m end
+			end
+		end
+		--print("END");
+		updateRunning = false
+		f:SetScript("OnUpdate", nil)
+		Repair:OnEnter(1, 1)
+	end
+	
+	TooltipBagItems = function()
+		local averageDur = dur/maxDur
+	
+		GameTooltip:Hide()
+		-- Some space and the actual text
+		tooltip:AddHeader(" ")
+		tooltip:AddHeader("Inventory")
+		if not updateRunning then
+			tooltip:AddLine(
+				TEXT_COLOR..L["Items in your bags"],                          -- Slot
+				DurabilityColor(averageDur)..math.floor(100*averageDur).."%", -- Dur
+				CopperToString(cost)                                          -- Cost
+			)
+		else
+			tooltip:AddLine(
+				TEXT_COLOR..L["Items in your bags"],                          -- Slot
+				"..%",                                                        -- Dur
+				L["Loading"]                                                  -- Cost
+			)
 		end
 	end
-	GameTooltip:Hide()
 	
-	local averageDur = dur/maxDur
-	
-	-- Some space and the actual text
-	tooltip:AddHeader(" ")
-	tooltip:AddHeader(L["Inventory"])
-	tooltip:AddLine(
-		TEXT_COLOR..L["Items in your bags"],                             -- Slot
-		DurabilityColor(averageDur)..math.floor(100*averageDur).."%", -- Dur
-		CopperToString(cost)                                          -- Cost
-	)
-	return cost or 0
+	UpdateInventoryCost = function()
+		if updateRunning or nextUpdateInventory > GetTime() then return end
+		nextUpdateInventory = GetTime() + 2 -- Max update every 2 sec
+		updateRunning = true;
+		--print("RESET")
+		gSlot, gBag = 0, 0
+		cost, dur, maxDur = 0, 1, 1
+		
+		local nextTime = GetTime()
+		f:SetScript("OnUpdate", UpdatePartialInventoryCost)
+	end
 end
 
 local TooltipRepairCost = function(cost)
@@ -225,6 +271,7 @@ local TooltipRepairCost = function(cost)
 end
 
 function Repair:OnEnter(forceUpdate)
+	print("ENTER")
 	local durUpdate = UpdateDurability() or tooltipRefresh
 	
 	if tooltip then
@@ -238,17 +285,18 @@ function Repair:OnEnter(forceUpdate)
 		end
 	else
 		-- Generate tooltip
-		tooltip = LibTooltip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
+		tooltip = LibQTip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
 	end
 	
 	-- Equipment dur/cost
-	local equiptedCost = TooltipEquiptedItems()
+	if not callback then equiptedCost = TooltipEquiptedItems() end
 	
 	-- Inventory dur/cost
-	local bagsCost = (not InCombatLockdown() and TooltipBagItems()) or 0
+	if not callback then UpdateInventoryCost() end
+	TooltipBagItems()
 	
 	-- Total repair costs
-	TooltipRepairCost(equiptedCost + bagsCost)
+	TooltipRepairCost(equiptedCost + inventoryCost)
 	
 	-- Mouse actions
 	if not InCombatLockdown() then TooltipSavedVars() end
