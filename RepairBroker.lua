@@ -194,14 +194,11 @@ do
 	local nextUpdateInventory = 0
 
 	local UpdatePartialInventoryCost = function()
-		--print("Space: " .. (gSlot or 0) .. " - " .. (gBag or 1))
 		local endLoop = GetTime() + .01
 		for bag = gBag or 0, 4 do
 			gBag = bag
-			--print("slot: " .. gSlot)
 			for slot = gSlot or 1, GetContainerNumSlots(bag) do
 				gSlot = slot
-				--print(bag .. " / " .. slot)
 				if endLoop < GetTime() then return end -- Stop loop
 				-- Cost
 				local _, repairCost = GameTooltip:SetBagItem(bag, slot)
@@ -212,7 +209,6 @@ do
 				if d and m then dur = dur + d; maxDur = maxDur + m end
 			end
 		end
-		--print("END");
 		updateRunning = false
 		f:SetScript("OnUpdate", nil)
 		Repair:OnEnter(1, 1)
@@ -244,7 +240,7 @@ do
 		if updateRunning or nextUpdateInventory > GetTime() then return end
 		nextUpdateInventory = GetTime() + 2 -- Max update every 2 sec
 		updateRunning = true;
-		--print("RESET")
+
 		gSlot, gBag = 0, 0
 		cost, dur, maxDur = 0, 1, 1
 		
@@ -271,7 +267,6 @@ local TooltipRepairCost = function(cost)
 end
 
 function Repair:OnEnter(forceUpdate)
-	print("ENTER")
 	local durUpdate = UpdateDurability() or tooltipRefresh
 	
 	if tooltip then
