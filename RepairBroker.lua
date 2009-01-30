@@ -3,10 +3,13 @@ local LibDataBroker = LibStub('LibDataBroker-1.1')
 if not LibDataBroker then return end
 local L = LibStub:GetLibrary( "AceLocale-3.0" ):GetLocale("RepairBroker" )
 local name = L["RepairBroker"]
+
+local tooltip = LibQTip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
 local Repair = LibDataBroker:NewDataObject(name, {
 	icon = "Interface\\Icons\\Trade_BlackSmithing",
 	label = L["Dur"],
 	text = "100%",
+	tooltip = tooltip,
 	}
 )
 
@@ -137,7 +140,13 @@ end)
 ---------------------------------
 -- TOOLTIP
 ---------------------------------
-local tooltip = nil
+-- Fix for DockingStation ++
+tooltip:SetScript("OnShow", function()
+	Repair.OnEnter(Repair, true)
+	tooltip:SetScript("OnShow", nil)
+end)
+tooltip:Hide()
+
 local TEXT_COLOR = "|cFFAAAAAA"
 
 local TooltipSavedVars = function()
@@ -269,18 +278,13 @@ end
 function Repair:OnEnter(forceUpdate)
 	local durUpdate = UpdateDurability() or tooltipRefresh
 	
-	if tooltip then
-		-- Allways update on force
-		if forceUpdate or durUpdate then
-			tooltip:Clear()
-		else
-			tooltip:Show()
-			tooltip:SmartAnchorTo(self)
-			return
-		end
+	-- Allways update on force
+	if forceUpdate or durUpdate then
+		tooltip:Clear()
 	else
-		-- Generate tooltip
-		tooltip = LibQTip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
+		tooltip:Show()
+		tooltip:SmartAnchorTo(self)
+		return
 	end
 	
 	-- Equipment dur/cost
