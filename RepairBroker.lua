@@ -111,6 +111,8 @@ local AutoRepair = function()
 	else
 		print(L["Unable to AutoRepair, you need "]..CopperToString(cost - GetMoney()))
 	end
+	-- Update dur
+	UpdateDurability()
 end
 
 local OnEvent = function(_, event, ...)
@@ -146,6 +148,9 @@ tooltip:SetScript("OnShow", function()
 	tooltip:SetScript("OnShow", nil)
 end)
 tooltip:Hide()
+-- Button bin hacks
+tooltip.GetOwner = function() return false end
+tooltip.SetOwner = function() return false end
 
 local TEXT_COLOR = "|cFFAAAAAA"
 
