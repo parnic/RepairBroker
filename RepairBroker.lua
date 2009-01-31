@@ -13,7 +13,7 @@ local Repair = {
 	tooltip = tooltip,
 }
 
-local equiptedCost = 0
+local equippedCost = 0
 local inventoryCost = 0
 local tooltipRefresh = true
 local print = function(msg) print("|cFF5555AA"..name..": |cFFAAAAFF"..msg) end
@@ -173,7 +173,7 @@ end
 local TooltipEquiptedItems = function()
 	local dur, totalCost, cost = 0, 0, nil
 	
-	tooltip:AddHeader(L["Equipted items"])
+	tooltip:AddHeader(L["Equipped items"])
 	
 	for i,info in ipairs(slots) do
 		-- Durability in %
@@ -301,14 +301,14 @@ function Repair:OnEnter(forceUpdate)
 	end
 	
 	-- Equipment dur/cost
-	if not callback then equiptedCost = TooltipEquiptedItems() end
+	if not callback then equippedCost = TooltipEquiptedItems() end
 	
 	-- Inventory dur/cost
 	if not callback then UpdateInventoryCost() end
 	TooltipBagItems()
 	
 	-- Total repair costs
-	TooltipRepairCost(equiptedCost + inventoryCost)
+	TooltipRepairCost(equippedCost + inventoryCost)
 	
 	-- Mouse actions
 	if not InCombatLockdown() then
