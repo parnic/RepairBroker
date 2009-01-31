@@ -16,5 +16,6 @@ libs\AceLocale-3.0\AceLocale-3.0.xml
 Locales\enUS.lua
 Locales\zhCN.lua
 Locales\zhTW.lua
+Locales\koKR.lua
 
 RepairBroker.lua
