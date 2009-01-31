@@ -5,13 +5,13 @@ local L = LibStub:GetLibrary( "AceLocale-3.0" ):GetLocale("RepairBroker" )
 local name = L["RepairBroker"]
 
 local tooltip = LibQTip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
-local Repair = LibDataBroker:NewDataObject(name, {
+
+local Repair = {
 	icon = "Interface\\Icons\\Trade_BlackSmithing",
 	label = L["Dur"],
 	text = "100%",
 	tooltip = tooltip,
-	}
-)
+}
 
 local equiptedCost = 0
 local inventoryCost = 0
@@ -144,13 +144,21 @@ end)
 ---------------------------------
 -- Fix for DockingStation ++
 tooltip:SetScript("OnShow", function()
-	Repair.OnEnter(Repair, true)
+	Repair.OnEnter(select(2, tooltip:GetPoint(1)))
+	tooltip:SmartAnchorTo(select(2, tooltip:GetPoint(1))) -- ReAnchor
 	tooltip:SetScript("OnShow", nil)
 end)
 tooltip:Hide()
 -- Button bin hacks
 tooltip.GetOwner = function() return false end
 tooltip.SetOwner = function() return false end
+
+-- NinjaPanel work arrounds
+Repair.OnTooltipShow = function(GameTooltip)
+	local anchorTo = select(2, GameTooltip:GetPoint(1)) -- Find the button we are now hovering over
+	anchorTo:SetScript("OnLeave", Repair.OnLeave)       -- Hide the tooltip when we leave
+	Repair.OnEnter(anchorTo)
+end
 
 local TEXT_COLOR = "|cFFAAAAAA"
 
@@ -225,7 +233,7 @@ do
 		end
 		updateRunning = false
 		f:SetScript("OnUpdate", nil)
-		Repair:OnEnter(1, 1)
+		Repair:OnEnter(true)
 	end
 	
 	TooltipBagItems = function()
@@ -303,15 +311,19 @@ function Repair:OnEnter(forceUpdate)
 	TooltipRepairCost(equiptedCost + inventoryCost)
 	
 	-- Mouse actions
-	if not InCombatLockdown() then TooltipSavedVars() end
+	if not InCombatLockdown() then
+		TooltipSavedVars()
+	end
 
 	tooltip:Show()
 	tooltipRefresh = InCombatLockdown() -- Re-draw if we were in combat
-	if not forceUpdate then tooltip:SmartAnchorTo(self) end
+	
+	if not forceUpdate then
+		tooltip:SmartAnchorTo(self)
+	end
 end
 
 function Repair:OnLeave()
-	if not tooltip then return end
 	tooltip:Hide()
 end
 
@@ -328,3 +340,6 @@ function Repair:OnClick(button)
 	end
 	tooltip:Show()
 end
+
+-- Everything is done, register
+Repair = LibDataBroker:NewDataObject(name, Repair)
