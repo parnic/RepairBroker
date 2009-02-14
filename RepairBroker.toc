@@ -3,7 +3,7 @@
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net
 ## Version: @project-version@
-## OptionalDeps: Ace3, Fortress, LibTooltip
+## OptionalDeps: Ace3
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
 
