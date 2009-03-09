@@ -182,8 +182,8 @@ do
 				return
 			end
 		end
-		
-		equippedCost = cost
+		GameTooltip:Hide()
+
 		Repair.text = DurabilityText(minDur)
 		Repair.RenderEquippedDurability()
 		f:SetScript("OnUpdate", nil)
