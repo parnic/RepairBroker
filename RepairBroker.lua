@@ -21,6 +21,9 @@ local inventoryCost = 0
 local inventoryLine = nil
 local factionLine = { }
 
+local autoRepairLine = nil
+local guildRepairLine = nil
+
 local GetInventorySlotInfo, GetContainerItemDurability, ipairs, print
  = GetInventorySlotInfo, GetContainerItemDurability, ipairs, print
 
@@ -42,13 +45,15 @@ do
 end
 
 function Repair:OnLoad()
-	Repair:CreateTooltipSkelet()
 	if not RepairBrokerDB then
 		RepairBrokerDB = {
 			autoRepair = 1,     -- nil or 1
 			useGuildBank = nil, -- nil or 1
 		}
 	end
+
+	-- Skelet
+	Repair:CreateTooltipSkelet()
 	
 	-- Cleanup
 	Repair.CreateTooltipSkelet = nil
@@ -136,12 +141,15 @@ function Repair:CreateTooltipSkelet()
 			"       "                                   -- Cost
 		)
 	end
-	
+
 	tooltip:AddHeader(" ")
 	tooltip:AddHeader(headerColor..L["Auto repair:"])
 	tooltip:AddLine(textColor..L["Force update"], " ", L["LeftMouse"])
-	tooltip:AddLine(textColor..L["Toggle auto-repair"], " ", L["RightMouse"])
-	tooltip:AddLine(textColor..L["Toggle guild bank-repair"], " ", L["MiddleMouse"])
+	autoRepairLine = tooltip:AddLine(textColor..L["Toggle auto-repair"], " ", L["RightMouse"])
+	guildRepairLine = tooltip:AddLine(textColor..L["Toggle guild bank-repair"], " ", L["MiddleMouse"])
+	
+	self:ToggleTextColor(autoRepairLine, L["Toggle auto-repair"], RepairBrokerDB.autoRepair)
+	self:ToggleTextColor(guildRepairLine, L["Toggle guild bank-repair"], RepairBrokerDB.useGuildBank)
 end
 
 do
@@ -168,7 +176,8 @@ do
 			-- Update %
 			info[3] = durPerc
 			-- Update cost
-			info[4] = select(3, GameTooltip:SetInventoryItem("player", info[1])) or 0
+			RepairBrokerScanner:ClearLines()
+			info[4] = select(3, RepairBrokerScanner:SetInventoryItem("player", info[1])) or 0
 			
 			-- Add to total cost
 			equippedCost = equippedCost + info[4]
@@ -178,11 +187,9 @@ do
 		
 			-- Stop loop
 			if endLoop < GetTime() then
-				GameTooltip:Hide()
 				return
 			end
 		end
-		GameTooltip:Hide()
 
 		Repair.text = DurabilityText(minDur)
 		Repair.RenderEquippedDurability()
@@ -301,6 +308,14 @@ function Repair:OnLeave()
 	tooltip:Hide()
 end
 
+function Repair:ToggleTextColor(line, text, bool)
+	if bool then
+		tooltip:SetCell(line, 1, "|cFF00FF00"..text)
+	else
+		tooltip:SetCell(line, 1, "|cFFFF0000"..text)
+	end
+end
+
 function Repair:OnClick(button)
 	if button == "RightButton" then
 		RepairBrokerDB.autoRepair = not RepairBrokerDB.autoRepair
@@ -313,6 +328,8 @@ function Repair:OnClick(button)
 		refreshTooltip = 0
 		Repair.OnEnter(anchorTo)
 	end
+	Repair:ToggleTextColor(autoRepairLine, L["Toggle auto-repair"], RepairBrokerDB.autoRepair)
+	Repair:ToggleTextColor(guildRepairLine, L["Toggle guild bank-repair"], RepairBrokerDB.useGuildBank)
 end
 
 --[[
@@ -332,7 +349,9 @@ do
 		while gBag < 5 do
 		
 			-- Cost
-			local _, repairCost = GameTooltip:SetBagItem(gBag, gSlot)
+			RepairBrokerScanner:ClearLines()
+			local _, repairCost = RepairBrokerScanner:SetBagItem(gBag, gSlot)
+
 			if repairCost then cost = cost + repairCost end
 			
 			-- Dur
@@ -348,11 +367,9 @@ do
 		
 			-- Stop loop
 			if endLoop < GetTime() then
-				GameTooltip:Hide()
 				return
 			end
 		end
-		GameTooltip:Hide()
 		
 		inventoryCost = cost
 		

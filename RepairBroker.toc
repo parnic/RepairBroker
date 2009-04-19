@@ -1,4 +1,4 @@
-## Interface: 30000
+## Interface: 31000
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net
@@ -18,4 +18,5 @@ Locales\zhCN.lua
 Locales\zhTW.lua
 Locales\koKR.lua
 
+tooltip.xml
 RepairBroker.lua
