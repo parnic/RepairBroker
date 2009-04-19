@@ -58,6 +58,9 @@ function Repair:OnLoad()
 	-- Cleanup
 	Repair.CreateTooltipSkelet = nil
 	Repair.OnLoad = nil
+	
+	-- Register @ LibBrokers
+	Repair = LibDataBroker:NewDataObject(name, Repair)
 end
 
 ---------------------------------
@@ -398,6 +401,3 @@ do
 		f:SetScript("OnUpdate", UpdatePartialInventoryCost)
 	end
 end
-
--- Everything is done, register
-Repair = LibDataBroker:NewDataObject(name, Repair)
