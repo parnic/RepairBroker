@@ -7,25 +7,25 @@ local name = L["RepairBroker"]
 local tooltip = LibQTip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
 
 local Repair = {
-	icon = "Interface\\Icons\\Trade_BlackSmithing",
+	icon  = "Interface\\Icons\\Trade_BlackSmithing",
 	label = L["Dur"],
-	text = "100%",
+	text  = "100%",
 }
 
 local headerColor = "|cFFFFFFFF";
-local textColor = "|cFFAAAAAA";
+local textColor   = "|cFFAAAAAA";
 
 local refreshTooltip = 0
-local equippedCost = 0
-local inventoryCost = 0
-local inventoryLine = nil
-local factionLine = { }
+local equippedCost   = 0
+local inventoryCost  = 0
+local inventoryLine  = nil
+local factionLine    = { }
 
-local autoRepairLine = nil
+local autoRepairLine  = nil
 local guildRepairLine = nil
 
 local GetInventorySlotInfo, GetContainerItemDurability, ipairs, print
- = GetInventorySlotInfo, GetContainerItemDurability, ipairs, print
+	= GetInventorySlotInfo, GetContainerItemDurability, ipairs, print
 
 local print = function(msg) print("|cFF5555AA"..name..": |cFFAAAAFF"..msg) end
 
@@ -44,23 +44,64 @@ do
 	end
 end
 
+-- States
+local states = {
+	autoRepair = {
+		default = 1,
+		[0] = {
+			color     = "|cFFFF0000",
+			status    = L["Disabled"],
+			nextState = 1,
+		},
+		[1] = {
+			color     = "|cFF00FF00",
+			status    = L["Enabled"],
+			nextState = 2,
+		},
+		[2] = {
+			color     = "|cFFFFFF00",
+			status    = L["Popup"],
+			nextState = 0,
+		},
+	},
+	guildRepair = {
+		default = 0,
+		[0] = {
+			color     = "|cFFFF0000",
+			status    = L["Disabled"],
+			nextState = 1,
+		},
+		[1] = {
+			color     = "|cFF00FF00",
+			status    = L["Enabled"],
+			nextState = 0,
+		},
+	},
+}
+
 function Repair:OnLoad()
 	if not RepairBrokerDB then
-		RepairBrokerDB = {
-			autoRepair = 1,     -- nil or 1
-			useGuildBank = nil, -- nil or 1
-		}
+		RepairBrokerDB = { }
+		for key,state in pairs(states) do
+			RepairBrokerDB[key] = state.default
+		end
 	end
 
 	-- Skelet
 	Repair:CreateTooltipSkelet()
 	
+	-- Update tooltip
+	RepairBroker_Popup_Repair:SetText(L["Repair"])
+	RepairBroker_Popup_Title:SetText(L["RepairBroker"])
+	RepairBroker_Popup_GuildRepair:SetText(L["GuildRepair"])
+	
 	-- Cleanup
-	Repair.CreateTooltipSkelet = nil
 	Repair.OnLoad = nil
+	Repair.CreateTooltipSkelet = nil
 	
 	-- Register @ LibBrokers
 	Repair = LibDataBroker:NewDataObject(name, Repair)
+	RepairBroker = Repair -- Register globaly
 end
 
 ---------------------------------
@@ -122,7 +163,7 @@ function Repair:CreateTooltipSkelet()
 		info[5] = tooltip:AddLine(
 			textColor..L[info[2]],   -- Slot
 			"   ",                   -- Dur
-			"       "                -- Cost
+			"           "            -- Cost
 		)
 	end
 	
@@ -148,11 +189,13 @@ function Repair:CreateTooltipSkelet()
 	tooltip:AddHeader(" ")
 	tooltip:AddHeader(headerColor..L["Auto repair:"])
 	tooltip:AddLine(textColor..L["Force update"], " ", L["LeftMouse"])
-	autoRepairLine = tooltip:AddLine(textColor..L["Toggle auto-repair"], " ", L["RightMouse"])
-	guildRepairLine = tooltip:AddLine(textColor..L["Toggle guild bank-repair"], " ", L["MiddleMouse"])
 	
-	self:ToggleTextColor(autoRepairLine, L["Toggle auto-repair"], RepairBrokerDB.autoRepair)
-	self:ToggleTextColor(guildRepairLine, L["Toggle guild bank-repair"], RepairBrokerDB.useGuildBank)
+	local autoRepairState  = Repair:GetState("autoRepair")
+	local guildRepairState = Repair:GetState("guildRepair")
+	
+	autoRepairLine  = tooltip:AddLine(autoRepairState.color ..L["Toggle auto-repair"],       " ", L["RightMouse"])
+	guildRepairLine = tooltip:AddLine(guildRepairState.color..L["Toggle guild bank-repair"], " ", L["MiddleMouse"])
+
 end
 
 do
@@ -229,19 +272,40 @@ function Repair:RenderTotalCost()
 end
 
 local AutoRepair = function()
-	if not RepairBrokerDB.autoRepair then return end
+	if not RepairBrokerDB.autoRepair or RepairBrokerDB.autoRepair == 0 then return end
 	local cost, canRepair = GetRepairAllCost()
 	if not canRepair or cost == 0 then return end
 	
 	-- Use guildbank to repair
-	if CanWithdrawGuildBankMoney() and RepairBrokerDB.useGuildBank and GetGuildBankMoney() >= cost then
-		RepairAllItems(1)
-		print(L["Repaired for "]..CopperToString(cost)..L[" (Guild bank)"])
-	elseif GetMoney() >= cost then -- Repair the old fashion way
+	if RepairBrokerDB.autoRepair == 1 then
+		if CanWithdrawGuildBankMoney() and RepairBrokerDB.useGuildBank and GetGuildBankMoney() >= cost then
+			Repair:RepairWithGuildBank()
+		else
+			Repair:Repair()
+		end
+	else
+		RepairBroker_Popup:Show()
+		RepairBroker_Popup_Cost:SetText(CopperToString(cost))
+	end
+end
+
+function Repair:Repair()
+	local cost = GetRepairAllCost()
+	if GetMoney() >= cost then
 		RepairAllItems()
 		print(L["Repaired for "]..CopperToString(cost))
 	else
 		print(L["Unable to AutoRepair, you need "]..CopperToString(cost - GetMoney()))
+	end
+end
+
+function Repair:RepairWithGuildBank()
+	local cost = GetRepairAllCost()
+	if GetGuildBankMoney() >= cost then
+		RepairAllItems(1)
+		print(L["Repaired for "]..CopperToString(cost)..L[" (Guild bank)"])
+	else
+		print(L["Unable to AutoRepair, you need "]..CopperToString(cost - GetGuildBankMoney())..L[" (Guild bank)"])
 	end
 end
 
@@ -311,28 +375,61 @@ function Repair:OnLeave()
 	tooltip:Hide()
 end
 
-function Repair:ToggleTextColor(line, text, bool)
-	if bool then
-		tooltip:SetCell(line, 1, "|cFF00FF00"..text)
-	else
-		tooltip:SetCell(line, 1, "|cFFFF0000"..text)
-	end
+function Repair:GetState(key)
+	assert(states[key], "Unknown state: "..(key or "nil"))
+	local currentState = RepairBrokerDB[key] or states[key].default
+	return states[key][currentState]
+end
+
+function Repair:SetNextState(key)
+	local currentState = Repair:GetState(key)
+	RepairBrokerDB[key] = currentState.nextState or 0
+	return Repair:GetState(key)
 end
 
 function Repair:OnClick(button)
+
 	if button == "RightButton" then
-		RepairBrokerDB.autoRepair = not RepairBrokerDB.autoRepair
-		print(L["Auto-repair "]..(RepairBrokerDB.autoRepair and "|cFF00FF00"..L["Enabled"] or "|cFFFF0000"..L["Disabled"]))
+		-- Update to next state, and return the new state
+		local state = Repair:SetNextState("autoRepair")
+	
+		-- Ex: Auto-repair [red]Disabled
+		print(L["Auto-repair "]..state.color..state.status)
+		
+		-- Update tooltip color
+		tooltip:SetCell(autoRepairLine, 1, state.color..L["Toggle auto-repair"])
+		
 	elseif button == "MiddleButton" then
-		RepairBrokerDB.useGuildBank = not RepairBrokerDB.useGuildBank
-		print(L["Guild bank-repair "]..(RepairBrokerDB.useGuildBank and "|cFF00FF00"..L["Enabled"] or "|cFFFF0000"..L["Disabled"]))
+		local state = Repair:SetNextState("guildRepair")
+	
+		-- Ex: Guild bank-repair [green]Enable
+		print(L["Guild bank-repair "]..state.color..state.status)
+		
+		-- Update tooltip color
+		tooltip:SetCell(guildRepairLine, 1, state.color..L["Toggle guild bank-repair"])
+
 	else
 		print("|cFF00FF00"..L["Force durability check."])
 		refreshTooltip = 0
 		Repair.OnEnter(anchorTo)
 	end
-	Repair:ToggleTextColor(autoRepairLine, L["Toggle auto-repair"], RepairBrokerDB.autoRepair)
-	Repair:ToggleTextColor(guildRepairLine, L["Toggle guild bank-repair"], RepairBrokerDB.useGuildBank)
+end
+
+Repair.PopupTooltip = function(self)
+	local isGuild = self:GetName():match"Guild"
+	local total
+	local cost = GetRepairAllCost()
+	if not isGuild then
+		total = GetMoney()
+	else
+		total = GetGuildBankMoney()
+	end
+	GameTooltip:SetOwner(this, "ANCHOR_BOTTOMRIGHT")
+	GameTooltip:AddDoubleLine("", "|c00000000|")
+	GameTooltip:AddDoubleLine("|c00000000|", CopperToString(total))
+	GameTooltip:AddDoubleLine("|cFFFFFFFF - ", CopperToString(cost))
+	GameTooltip:AddDoubleLine("|cFFFFFFFF = ", CopperToString(total - cost))
+	GameTooltip:Show()
 end
 
 --[[

@@ -35,3 +35,6 @@ L["Feet"] = true
 L["MainHand"] = "Main hand"
 L["SecondaryHand"] = "Off-hand"
 L["Ranged"] = true
+L["Popup"] = true
+L["Repair"] = true
+L["GuildRepair"] = true
