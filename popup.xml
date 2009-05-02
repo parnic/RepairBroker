@@ -97,7 +97,7 @@
 				</Anchors>
 				<Scripts>
 					<OnShow>
-						if CanWithdrawGuildBankMoney() then
+						if CanGuildBankRepair() then
 							this:Enable()
 						else
 							this:Disable()

@@ -278,7 +278,7 @@ local AutoRepair = function()
 	
 	-- Use guildbank to repair
 	if RepairBrokerDB.autoRepair == 1 then
-		if CanWithdrawGuildBankMoney() and RepairBrokerDB.useGuildBank and GetGuildBankMoney() >= cost then
+		if CanGuildBankRepair() and RepairBrokerDB.useGuildBank and GetGuildBankWithdrawMoney() >= cost then
 			Repair:RepairWithGuildBank()
 		else
 			Repair:Repair()
@@ -301,11 +301,11 @@ end
 
 function Repair:RepairWithGuildBank()
 	local cost = GetRepairAllCost()
-	if GetGuildBankMoney() >= cost then
+	if GetGuildBankWithdrawMoney() >= cost then
 		RepairAllItems(1)
 		print(L["Repaired for "]..CopperToString(cost)..L[" (Guild bank)"])
 	else
-		print(L["Unable to AutoRepair, you need "]..CopperToString(cost - GetGuildBankMoney())..L[" (Guild bank)"])
+		print(L["Unable to AutoRepair, you need "]..CopperToString(cost - GetGuildBankWithdrawMoney())..L[" (Guild bank)"])
 	end
 end
 
@@ -422,7 +422,7 @@ Repair.PopupTooltip = function(self)
 	if not isGuild then
 		total = GetMoney()
 	else
-		total = GetGuildBankMoney()
+		total = GetGuildBankWithdrawMoney()
 	end
 	GameTooltip:SetOwner(this, "ANCHOR_BOTTOMRIGHT")
 	GameTooltip:AddDoubleLine("", "|c00000000|")
