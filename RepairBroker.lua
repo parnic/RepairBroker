@@ -82,10 +82,16 @@ local states = {
 function Repair:OnLoad()
 	if not RepairBrokerDB then
 		RepairBrokerDB = { }
-		for key,state in pairs(states) do
+	end
+	for key,state in pairs(states) do
+		-- Reset to known states
+		if not RepairBrokerDB[key] or not states[key][ RepairBrokerDB[key] ] then
 			RepairBrokerDB[key] = state.default
 		end
 	end
+	
+	-- Clean up saved vars
+	RepairBrokerDB["useGuildBank"] = nil
 
 	-- Skelet
 	Repair:CreateTooltipSkelet()
@@ -278,7 +284,7 @@ local AutoRepair = function()
 	
 	-- Use guildbank to repair
 	if RepairBrokerDB.autoRepair == 1 then
-		if CanGuildBankRepair() and RepairBrokerDB.useGuildBank and GetGuildBankWithdrawMoney() >= cost then
+		if CanGuildBankRepair() and RepairBrokerDB.guildRepair and GetGuildBankWithdrawMoney() >= cost then
 			Repair:RepairWithGuildBank()
 		else
 			Repair:Repair()
