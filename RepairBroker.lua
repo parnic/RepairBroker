@@ -4,7 +4,7 @@ if not LibDataBroker or not LibQTip then return end
 local L = LibStub:GetLibrary( "AceLocale-3.0" ):GetLocale("RepairBroker" )
 local name = L["RepairBroker"]
 
-local tooltip = LibQTip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
+local tooltip = nil
 
 local Repair = {
 	icon  = "Interface\\Icons\\Trade_BlackSmithing",
@@ -92,18 +92,11 @@ function Repair:OnLoad()
 	
 	-- Clean up saved vars
 	RepairBrokerDB["useGuildBank"] = nil
-
-	-- Skelet
-	Repair:CreateTooltipSkelet()
 	
 	-- Update tooltip
 	RepairBroker_Popup_Repair:SetText(L["Repair"])
 	RepairBroker_Popup_Title:SetText(L["RepairBroker"])
 	RepairBroker_Popup_GuildRepair:SetText(L["GuildRepair"])
-	
-	-- Cleanup
-	Repair.OnLoad = nil
-	Repair.CreateTooltipSkelet = nil
 	
 	-- Register @ LibBrokers
 	Repair = LibDataBroker:NewDataObject(name, Repair)
@@ -262,6 +255,7 @@ do
 end
 
 function Repair:RenderEquippedDurability()
+	if not tooltip then return end
 	for i,info in ipairs(slots) do
 		tooltip:SetCell(info[5], 2, DurabilityText(info[3]))
 		tooltip:SetCell(info[5], 3, CopperToString(info[4]))
@@ -269,6 +263,7 @@ function Repair:RenderEquippedDurability()
 end
 
 function Repair:RenderTotalCost()
+	if not tooltip then return end
 	local m = 1
 	local cost = equippedCost + inventoryCost
 	for i=4, 8 do
@@ -356,7 +351,7 @@ end
 ---------------------------------
 local anchorTo
 Repair.OnTooltipShowInternal = function(GameTooltip)
-	if refreshTooltip + 20 > GetTime() then return end
+	--if refreshTooltip + 20 > GetTime() then return end
 
 	-- Anchor
 	--print("Anchor to: "..(anchorTo:GetName() or "nil.."))
@@ -372,13 +367,20 @@ Repair.OnTooltipShowInternal = function(GameTooltip)
 end
 --
 function Repair:OnEnter()
+	-- Create tooltip
+	tooltip = LibQTip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
+	
+	-- Skelet
+	Repair:CreateTooltipSkelet()
+	
 	anchorTo = self
 	tooltip:Show()
 	Repair.OnTooltipShowInternal()
 end
 
 function Repair:OnLeave()
-	tooltip:Hide()
+	LibQTip:Release(tooltip)
+	tooltip = nil
 end
 
 function Repair:GetState(key)
@@ -403,7 +405,9 @@ function Repair:OnClick(button)
 		print(L["Auto-repair "]..state.color..state.status)
 		
 		-- Update tooltip color
-		tooltip:SetCell(autoRepairLine, 1, state.color..L["Toggle auto-repair"])
+		if tooltip then
+			tooltip:SetCell(autoRepairLine, 1, state.color..L["Toggle auto-repair"])
+		end
 		
 	elseif button == "MiddleButton" then
 		local state = Repair:SetNextState("guildRepair")
@@ -412,7 +416,9 @@ function Repair:OnClick(button)
 		print(L["Guild bank-repair "]..state.color..state.status)
 		
 		-- Update tooltip color
-		tooltip:SetCell(guildRepairLine, 1, state.color..L["Toggle guild bank-repair"])
+		if tooltip then
+			tooltip:SetCell(guildRepairLine, 1, state.color..L["Toggle guild bank-repair"])
+		end
 
 	else
 		print("|cFF00FF00"..L["Force durability check."])
@@ -479,17 +485,19 @@ do
 		
 		inventoryCost = cost
 		
-		tooltip:SetCell(inventoryLine, 2, DurabilityText(dur/maxDur))
-		tooltip:SetCell(inventoryLine, 3, CopperToString(cost))
+		if tooltip then
+			tooltip:SetCell(inventoryLine, 2, DurabilityText(dur/maxDur))
+			tooltip:SetCell(inventoryLine, 3, CopperToString(cost))
+		end
 		Repair.RenderTotalCost()
 		
 		updateRunning = false
-		f:SetScript("OnUpdate", nil)
+		f:Hide()
 	end
 
 	function Repair:UpdateInventoryCost()
 		if updateRunning or nextUpdateInventory > GetTime() then return end
-		nextUpdateInventory = GetTime() + 2 -- Max update every 2 sec
+		--nextUpdateInventory = GetTime() + 2 -- Max update every 2 sec
 		updateRunning = true;
 		
 		-- Start smal
@@ -501,6 +509,9 @@ do
 		cost, dur, maxDur = 0, 1, 1
 		
 		local nextTime = GetTime()
-		f:SetScript("OnUpdate", UpdatePartialInventoryCost)
+		f:Show()
 	end
+	
+	f:Hide()
+	f:SetScript("OnUpdate", UpdatePartialInventoryCost)
 end
