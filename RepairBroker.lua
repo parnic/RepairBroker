@@ -10,6 +10,7 @@ local Repair = {
 	icon  = "Interface\\Icons\\Trade_BlackSmithing",
 	label = L["Dur"],
 	text  = "100%",
+	type = "data source",
 }
 
 local headerColor = "|cFFFFFFFF";
@@ -34,7 +35,7 @@ local slots = { }
 do
 	local slotNames = { "Head", "Shoulder", "Chest", "Wrist", "Hands", "Waist", "Legs", "Feet", "MainHand", "SecondaryHand", "Ranged" }
 	for i,name in ipairs(slotNames) do
-		slots[ i ] = {	
+		slots[ i ] = {
 			GetInventorySlotInfo(name.."Slot"), -- slotId
 			name, -- slotName, used for translation
 			-1,    -- Durability
@@ -89,15 +90,15 @@ function Repair:OnLoad()
 			RepairBrokerDB[key] = state.default
 		end
 	end
-	
+
 	-- Clean up saved vars
 	RepairBrokerDB["useGuildBank"] = nil
-	
+
 	-- Update tooltip
 	RepairBroker_Popup_Repair:SetText(L["Repair"])
 	RepairBroker_Popup_Title:SetText(L["RepairBroker"])
 	RepairBroker_Popup_GuildRepair:SetText(L["GuildRepair"])
-	
+
 	-- Register @ LibBrokers
 	Repair = LibDataBroker:NewDataObject(name, Repair)
 	RepairBroker = Repair -- Register globaly
@@ -123,7 +124,7 @@ end
 
 local CopperToString = function(c)
 	if c == 0 then return "" end
-	
+
 	local str = ""
 	if not c or c < 0 then return str end
 	if c >= 10000 then
@@ -155,7 +156,7 @@ end
 ---------------------------------
 function Repair:CreateTooltipSkelet()
 	local line
-	
+
 	tooltip:AddHeader(headerColor..L["Equipped items"])
 	for i,info in ipairs(slots) do
 		-- Set the empty row
@@ -165,7 +166,7 @@ function Repair:CreateTooltipSkelet()
 			"           "            -- Cost
 		)
 	end
-	
+
 	tooltip:AddHeader(" ")
 	tooltip:AddHeader(headerColor..L["Inventory"])
 	inventoryLine = tooltip:AddLine(
@@ -173,7 +174,7 @@ function Repair:CreateTooltipSkelet()
 		"..%",                              -- Dur
 		L["Loading"]                        -- Cost
 	)
-	
+
 	tooltip:AddHeader(" ")
 	tooltip:AddHeader(headerColor..L["Total cost"])
 
@@ -188,10 +189,10 @@ function Repair:CreateTooltipSkelet()
 	tooltip:AddHeader(" ")
 	tooltip:AddHeader(headerColor..L["Auto repair:"])
 	tooltip:AddLine(textColor..L["Force update"], " ", L["LeftMouse"])
-	
+
 	local autoRepairState  = Repair:GetState("autoRepair")
 	local guildRepairState = Repair:GetState("guildRepair")
-	
+
 	autoRepairLine  = tooltip:AddLine(autoRepairState.color ..L["Toggle auto-repair"],       " ", L["RightMouse"])
 	guildRepairLine = tooltip:AddLine(guildRepairState.color..L["Toggle guild bank-repair"], " ", L["MiddleMouse"])
 
@@ -206,10 +207,10 @@ do
 
 	local UpdateEquippedItemsPartial = function()
 		local endLoop = GetTime() + .01
-		
+
 		while slots[i] do
 			local info = slots[i]
-		
+
 			durPerc = -1 -- Default: no item equipted
 			if GetInventoryItemLink("player", info[1]) then
 				dur, max = GetInventoryItemDurability(info[1])
@@ -223,13 +224,13 @@ do
 			-- Update cost
 			RepairBrokerScanner:ClearLines()
 			info[4] = select(3, RepairBrokerScanner:SetInventoryItem("player", info[1])) or 0
-			
+
 			-- Add to total cost
 			equippedCost = equippedCost + info[4]
-		
+
 			-- Make ready for the next round
 			i = i + 1
-		
+
 			-- Stop loop
 			if endLoop < GetTime() then
 				return
@@ -244,12 +245,12 @@ do
 	function Repair:UpdateEquippedDurability()
 		-- Start smal
 		equippedCost = 0;
-		
+
 		-- Reset vars
 		i = 1
 		cost = 0
 		minDur = 1
-		
+
 		f:SetScript("OnUpdate", UpdateEquippedItemsPartial)
 	end
 end
@@ -276,7 +277,7 @@ local AutoRepair = function()
 	if not RepairBrokerDB.autoRepair or RepairBrokerDB.autoRepair == 0 then return end
 	local cost, canRepair = GetRepairAllCost()
 	if not canRepair or cost == 0 then return end
-	
+
 	-- Use guildbank to repair
 	if RepairBrokerDB.autoRepair == 1 then
 		if CanGuildBankRepair() and RepairBrokerDB.guildRepair and GetGuildBankWithdrawMoney() >= cost then
@@ -326,7 +327,7 @@ do -- Hide from the world
 		f:RegisterEvent("MERCHANT_SHOW")
 		f:RegisterEvent("MERCHANT_CLOSED")
 	end)
-	
+
 	OnEvent = function(_, event, ...)
 		if event ~= "MERCHANT_SHOW" then
 			Repair.UpdateEquippedDurability()
@@ -356,23 +357,23 @@ Repair.OnTooltipShowInternal = function(GameTooltip)
 	-- Anchor
 	--print("Anchor to: "..(anchorTo:GetName() or "nil.."))
 	tooltip:SmartAnchorTo(anchorTo) -- ReAnchor
-	
+
 	-- Update information
 	Repair.UpdateEquippedDurability()
 	Repair.RenderEquippedDurability()
 	Repair.UpdateInventoryCost()
 	Repair.RenderTotalCost()
-	
+
 	refreshTooltip = GetTime()
 end
 --
 function Repair:OnEnter()
 	-- Create tooltip
 	tooltip = LibQTip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
-	
+
 	-- Skelet
 	Repair:CreateTooltipSkelet()
-	
+
 	anchorTo = self
 	tooltip:Show()
 	Repair.OnTooltipShowInternal()
@@ -400,21 +401,21 @@ function Repair:OnClick(button)
 	if button == "RightButton" then
 		-- Update to next state, and return the new state
 		local state = Repair:SetNextState("autoRepair")
-	
+
 		-- Ex: Auto-repair [red]Disabled
 		print(L["Auto-repair "]..state.color..state.status)
-		
+
 		-- Update tooltip color
 		if tooltip then
 			tooltip:SetCell(autoRepairLine, 1, state.color..L["Toggle auto-repair"])
 		end
-		
+
 	elseif button == "MiddleButton" then
 		local state = Repair:SetNextState("guildRepair")
-	
+
 		-- Ex: Guild bank-repair [green]Enable
 		print(L["Guild bank-repair "]..state.color..state.status)
-		
+
 		-- Update tooltip color
 		if tooltip then
 			tooltip:SetCell(guildRepairLine, 1, state.color..L["Toggle guild bank-repair"])
@@ -457,40 +458,40 @@ do
 
 	local UpdatePartialInventoryCost = function()
 		local endLoop = GetTime() + .01
-		
+
 		while gBag < 5 do
-		
+
 			-- Cost
 			RepairBrokerScanner:ClearLines()
 			local _, repairCost = RepairBrokerScanner:SetBagItem(gBag, gSlot)
 
 			if repairCost then cost = cost + repairCost end
-			
+
 			-- Dur
 			d, m = GetContainerItemDurability(gBag, gSlot)
 			if d and m then dur = dur + d; maxDur = maxDur + m end
-		
+
 			-- Make ready for the next round
 			gSlot = gSlot + 1
 			if gSlot > GetContainerNumSlots(gBag) then
 				gBag = gBag + 1
 				gSlot = 1
 			end
-		
+
 			-- Stop loop
 			if endLoop < GetTime() then
 				return
 			end
 		end
-		
+
 		inventoryCost = cost
-		
+
 		if tooltip then
 			tooltip:SetCell(inventoryLine, 2, DurabilityText(dur/maxDur))
 			tooltip:SetCell(inventoryLine, 3, CopperToString(cost))
 		end
 		Repair.RenderTotalCost()
-		
+
 		updateRunning = false
 		f:Hide()
 	end
@@ -499,19 +500,19 @@ do
 		if updateRunning or nextUpdateInventory > GetTime() then return end
 		--nextUpdateInventory = GetTime() + 2 -- Max update every 2 sec
 		updateRunning = true;
-		
+
 		-- Start smal
 		inventoryCost = 0;
-		
+
 		tooltip:SetCell(inventoryLine, 2, "..%")
 		tooltip:SetCell(inventoryLine, 3, L["Loading"])
 		gSlot, gBag = 1, 0
 		cost, dur, maxDur = 0, 1, 1
-		
+
 		local nextTime = GetTime()
 		f:Show()
 	end
-	
+
 	f:Hide()
 	f:SetScript("OnUpdate", UpdatePartialInventoryCost)
 end
