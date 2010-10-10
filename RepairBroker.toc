@@ -6,6 +6,7 @@
 ## OptionalDeps: Ace3, LibQTip-1.0
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
+## X-Compatible-With: 40000
 
 libs\LibStub\LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
