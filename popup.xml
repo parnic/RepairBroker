@@ -79,7 +79,7 @@
 						RepairBroker_Popup:Hide()
 					</OnClick>
 					<OnEnter>
-						RepairBroker.PopupTooltip(this)
+						RepairBroker.PopupTooltip(self)
 					</OnEnter>
 					<OnLeave>
 						GameTooltip:Hide()
@@ -98,9 +98,9 @@
 				<Scripts>
 					<OnShow>
 						if CanGuildBankRepair() then
-							this:Enable()
+							self:Enable()
 						else
-							this:Disable()
+							self:Disable()
 						end
 					</OnShow>
 					<OnClick>
@@ -108,7 +108,7 @@
 						RepairBroker_Popup:Hide()
 					</OnClick>
 					<OnEnter>
-						RepairBroker.PopupTooltip(this)
+						RepairBroker.PopupTooltip(self)
 					</OnEnter>
 					<OnLeave>
 						GameTooltip:Hide()

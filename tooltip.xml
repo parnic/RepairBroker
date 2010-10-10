@@ -3,7 +3,7 @@
  <GameTooltip name="RepairBrokerScanner" inherits="GameTooltipTemplate">
    <Scripts>
      <Onload>
-       this:SetOwner(WorldFrame, "ANCHOR_NONE");
+       self:SetOwner(WorldFrame, "ANCHOR_NONE");
      </Onload>
    </Scripts>
  </GameTooltip>

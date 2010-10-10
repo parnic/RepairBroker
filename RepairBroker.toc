@@ -1,9 +1,9 @@
-## Interface: 30100
+## Interface: 30300
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
-## Author: Merl @ chainwet.net
+## Author: Merl @ chainwet.net, continued by Parnic @ parnic.com
 ## Version: @project-version@
-## OptionalDeps: Ace3
+## OptionalDeps: Ace3, LibQTip-1.0
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
 

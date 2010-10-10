@@ -437,7 +437,7 @@ Repair.PopupTooltip = function(self)
 	else
 		total = GetGuildBankWithdrawMoney()
 	end
-	GameTooltip:SetOwner(this, "ANCHOR_BOTTOMRIGHT")
+	GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
 	GameTooltip:AddDoubleLine("", "|c00000000|")
 	GameTooltip:AddDoubleLine("|c00000000|", CopperToString(total))
 	GameTooltip:AddDoubleLine("|cFFFFFFFF - ", CopperToString(cost))
