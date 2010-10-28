@@ -7,11 +7,13 @@
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
 
+#@no-lib-strip@
 libs\LibStub\LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
-libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 libs\LibQTip-1.0\LibQTip-1.0.lua
 libs\AceLocale-3.0\AceLocale-3.0.xml
+#@end-no-lib-strip@
+LibDataBroker-1.1.lua
 
 Locales\enUS.lua
 Locales\zhCN.lua
