@@ -280,7 +280,8 @@ local AutoRepair = function()
 
 	-- Use guildbank to repair
 	if RepairBrokerDB.autoRepair == 1 then
-		if CanGuildBankRepair() and RepairBrokerDB.guildRepair and GetGuildBankWithdrawMoney() >= cost then
+		local GuildBankWithdraw = GetGuildBankWithdrawMoney()
+		if CanGuildBankRepair() and RepairBrokerDB.guildRepair == 1 and (GuildBankWithdraw == -1 or GuildBankWithdraw >= cost) then
 			Repair:RepairWithGuildBank()
 		else
 			Repair:Repair()
@@ -303,11 +304,12 @@ end
 
 function Repair:RepairWithGuildBank()
 	local cost = GetRepairAllCost()
-	if GetGuildBankWithdrawMoney() >= cost then
+	local GuildBankWithdraw = GetGuildBankWithdrawMoney()
+	if GuildBankWithdraw == -1 or GuildBankWithdraw >= cost then
 		RepairAllItems(1)
 		print(L["Repaired for "]..CopperToString(cost)..L[" (Guild bank)"])
 	else
-		print(L["Unable to AutoRepair, you need "]..CopperToString(cost - GetGuildBankWithdrawMoney())..L[" (Guild bank)"])
+		print(L["Unable to AutoRepair, you need "]..CopperToString(cost - GuildBankWithdraw)..L[" (Guild bank)"])
 	end
 end
 
