@@ -154,7 +154,7 @@ end
 ---------------------------------
 -- Durability updates and repair
 ---------------------------------
-function Repair:CreateTooltipSkelet()
+function Repair:CreateTooltipSkeleton()
 	local line
 
 	tooltip:AddHeader(headerColor..L["Equipped items"])
@@ -374,7 +374,7 @@ function Repair:OnEnter()
 	tooltip = LibQTip:Acquire("RepairTooltip", 3, "LEFT", "CENTER", "RIGHT")
 
 	-- Skelet
-	Repair:CreateTooltipSkelet()
+	Repair:CreateTooltipSkeleton()
 
 	anchorTo = self
 	tooltip:Show()
@@ -399,7 +399,6 @@ function Repair:SetNextState(key)
 end
 
 function Repair:OnClick(button)
-
 	if button == "RightButton" then
 		-- Update to next state, and return the new state
 		local state = Repair:SetNextState("autoRepair")
@@ -411,8 +410,7 @@ function Repair:OnClick(button)
 		if tooltip then
 			tooltip:SetCell(autoRepairLine, 1, state.color..L["Toggle auto-repair"])
 		end
-
-	elseif button == "MiddleButton" then
+	elseif button == "MiddleButton" or (IsShiftKeyDown() and button == "LeftButton") then
 		local state = Repair:SetNextState("guildRepair")
 
 		-- Ex: Guild bank-repair [green]Enable
@@ -422,7 +420,6 @@ function Repair:OnClick(button)
 		if tooltip then
 			tooltip:SetCell(guildRepairLine, 1, state.color..L["Toggle guild bank-repair"])
 		end
-
 	else
 		print("|cFF00FF00"..L["Force durability check."])
 		refreshTooltip = 0
