@@ -316,8 +316,9 @@ local AutoRepair = function()
 	-- Use guildbank to repair
 	if RepairBrokerDB.autoRepair == 1 then
 		if RepairBrokerDB.OnlyRepairReaction and RepairBrokerDB.OnlyRepairReaction > 0 then
-			if UnitReaction("target","player") < RepairBrokerDB.OnlyRepairReaction then
-				--print("Skipped auto-repair due to faction. is "..UnitReaction("target","player").." want "..RepairBrokerDB.OnlyRepairReaction)
+			local reaction = UnitReaction("target","player")
+			if reaction and reaction < RepairBrokerDB.OnlyRepairReaction then
+				--print("Skipped auto-repair due to faction. is "..tostring(reaction).." want "..RepairBrokerDB.OnlyRepairReaction)
 				return
 			end
 		end
