@@ -24,9 +24,10 @@ local factionLine    = { }
 
 local autoRepairLine  = nil
 local guildRepairLine = nil
+local factionRepairLine=nil
 
-local GetInventorySlotInfo, GetContainerItemDurability, ipairs, print
-	= GetInventorySlotInfo, GetContainerItemDurability, ipairs, print
+local GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReaction
+	= GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReaction
 
 local print = function(msg) print("|cFF5555AA"..name..": |cFFAAAAFF"..msg) end
 
@@ -75,6 +76,39 @@ local states = {
 		[1] = {
 			color     = "|cFF00FF00",
 			status    = L["Enabled"],
+			nextState = 0,
+		},
+	},
+	OnlyRepairReaction = {
+		default = 0,
+		[0] = {
+			color     = "|cFFFF0000",
+			status    = L["Disabled"],
+			nextState = 4,
+		},
+		[4] = {
+			color     = "|cFF00FF00",
+			status    = FACTION_STANDING_LABEL4,
+			nextState = 5,
+		},
+		[5] = {
+			color     = "|cFF00FF00",
+			status    = FACTION_STANDING_LABEL5,
+			nextState = 6,
+		},
+		[6] = {
+			color     = "|cFF00FF00",
+			status    = FACTION_STANDING_LABEL6,
+			nextState = 7,
+		},
+		[7] = {
+			color     = "|cFF00FF00",
+			status    = FACTION_STANDING_LABEL7,
+			nextState = 8,
+		},
+		[8] = {
+			color     = "|cFF00FF00",
+			status    = FACTION_STANDING_LABEL8,
 			nextState = 0,
 		},
 	},
@@ -192,10 +226,11 @@ function Repair:CreateTooltipSkeleton()
 
 	local autoRepairState  = Repair:GetState("autoRepair")
 	local guildRepairState = Repair:GetState("guildRepair")
+	local factionRepairState=Repair:GetState("OnlyRepairReaction")
 
 	autoRepairLine  = tooltip:AddLine(autoRepairState.color ..L["Toggle auto-repair"],       " ", L["RightMouse"])
 	guildRepairLine = tooltip:AddLine(guildRepairState.color..L["Toggle guild bank-repair"], " ", L["MiddleMouse"])
-
+	factionRepairLine=tooltip:AddLine(factionRepairState.color..L["Reputation requirement: "] .. factionRepairState.status, " ", L["Shift-RightMouse"])
 end
 
 do
@@ -280,6 +315,13 @@ local AutoRepair = function()
 
 	-- Use guildbank to repair
 	if RepairBrokerDB.autoRepair == 1 then
+		if RepairBrokerDB.OnlyRepairReaction and RepairBrokerDB.OnlyRepairReaction > 0 then
+			if UnitReaction("target","player") < RepairBrokerDB.OnlyRepairReaction then
+				--print("Skipped auto-repair due to faction. is "..UnitReaction("target","player").." want "..RepairBrokerDB.OnlyRepairReaction)
+				return
+			end
+		end
+
 		local GuildBankWithdraw = GetGuildBankWithdrawMoney()
 		if CanGuildBankRepair() and RepairBrokerDB.guildRepair == 1 and (GuildBankWithdraw == -1 or GuildBankWithdraw >= cost) then
 			Repair:RepairWithGuildBank()
@@ -400,15 +442,28 @@ end
 
 function Repair:OnClick(button)
 	if button == "RightButton" then
-		-- Update to next state, and return the new state
-		local state = Repair:SetNextState("autoRepair")
+		if IsShiftKeyDown() then
+			-- Update to next state, and return the new state
+			local state = Repair:SetNextState("OnlyRepairReaction")
 
-		-- Ex: Auto-repair [red]Disabled
-		print(L["Auto-repair "]..state.color..state.status)
+			-- Ex: Auto-repair [red]Disabled
+			print(L["Faction repair "]..state.color..state.status)
 
-		-- Update tooltip color
-		if tooltip then
-			tooltip:SetCell(autoRepairLine, 1, state.color..L["Toggle auto-repair"])
+			-- Update tooltip color
+			if tooltip then
+				tooltip:SetCell(factionRepairLine, 1, state.color..L["Reputation requirement: "] .. state.status)
+			end
+		else
+			-- Update to next state, and return the new state
+			local state = Repair:SetNextState("autoRepair")
+
+			-- Ex: Auto-repair [red]Disabled
+			print(L["Auto-repair "]..state.color..state.status)
+
+			-- Update tooltip color
+			if tooltip then
+				tooltip:SetCell(autoRepairLine, 1, state.color..L["Toggle auto-repair"])
+			end
 		end
 	elseif button == "MiddleButton" or (IsShiftKeyDown() and button == "LeftButton") then
 		local state = Repair:SetNextState("guildRepair")

@@ -35,3 +35,6 @@ L["Feet"] = "腳"
 L["MainHand"] = "主手"
 L["SecondaryHand"] = "副手"
 L["Ranged"] = "聖物"
+L["Shift-RightMouse"] = true -- needs translation
+L["Reputation requirement: "] = true -- needs translation
+L["Faction repair "] = true -- needs translation

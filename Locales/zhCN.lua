@@ -23,3 +23,6 @@ L["Enabled"] = "开启"
 L["Disabled"] = "关闭"
 L["Guild bank-repair "] = "公会银行修理"
 L["Force durability check."] = "强制耐久检查"
+L["Shift-RightMouse"] = true -- needs translation
+L["Reputation requirement: "] = true -- needs translation
+L["Faction repair "] = true -- needs translation

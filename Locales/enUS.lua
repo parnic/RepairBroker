@@ -38,3 +38,6 @@ L["Ranged"] = true
 L["Popup"] = true
 L["Repair"] = true
 L["GuildRepair"] = true
+L["Shift-RightMouse"] = true
+L["Reputation requirement: "] = true
+L["Faction repair "] = true

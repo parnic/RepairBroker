@@ -37,3 +37,6 @@ L["Ranged"] = "원거리 장비"
 L["Popup"] = "팝업"
 L["Repair"] = "수리"
 L["GuildRepair"] = "길드 수리"
+L["Shift-RightMouse"] = true -- needs translation
+L["Reputation requirement: "] = true -- needs translation
+L["Faction repair "] = true -- needs translation
