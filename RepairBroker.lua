@@ -31,10 +31,15 @@ local GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReact
 
 local print = function(msg) print("|cFF5555AA"..name..": |cFFAAAAFF"..msg) end
 
+local WowVer = select(4, GetBuildInfo())
+
 -- Stores equipped item info
 local slots = { }
 do
-	local slotNames = { "Head", "Shoulder", "Chest", "Wrist", "Hands", "Waist", "Legs", "Feet", "MainHand", "SecondaryHand", "Ranged" }
+	local slotNames = { "Head", "Shoulder", "Chest", "Wrist", "Hands", "Waist", "Legs", "Feet", "MainHand", "SecondaryHand" }
+	if WowVer < 50000 then
+		table.insert(slotNames, #slotNames, "Ranged")
+	end
 	for i,name in ipairs(slotNames) do
 		slots[ i ] = {
 			GetInventorySlotInfo(name.."Slot"), -- slotId
