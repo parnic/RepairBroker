@@ -6,6 +6,7 @@
 ## OptionalDeps: Ace3, LibQTip-1.0
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
+## X-Compatible-With: 40300
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
