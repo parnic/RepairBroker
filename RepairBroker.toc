@@ -1,4 +1,4 @@
-## Interface: 50001
+## Interface: 50100
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net, continued by Parnic @ parnic.com
