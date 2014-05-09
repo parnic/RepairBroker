@@ -329,7 +329,7 @@ local AutoRepair = function()
 		end
 
 		local GuildBankWithdraw = GetGuildBankWithdrawMoney()
-		if CanGuildBankRepair() and RepairBrokerDB.guildRepair == 1 and (GuildBankWithdraw == -1 or GuildBankWithdraw >= cost) then
+		if CanGuildBankRepair() and RepairBrokerDB.guildRepair == 1 and (GuildBankWithdraw == -1 or GuildBankWithdraw >= cost) and not GetGuildInfoText():match("%[noautorepair%]") then
 			Repair:RepairWithGuildBank()
 		else
 			Repair:Repair()
