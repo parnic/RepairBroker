@@ -376,6 +376,7 @@ do -- Hide from the world
 		f:RegisterEvent("UPDATE_INVENTORY_ALERTS")
 		f:RegisterEvent("MERCHANT_SHOW")
 		f:RegisterEvent("MERCHANT_CLOSED")
+		f:RegisterEvent("PLAYER_ENTERING_WORLD")
 	end)
 
 	OnEvent = function(_, event, ...)
@@ -431,6 +432,7 @@ end
 
 function Repair:OnLeave()
 	LibQTip:Release(tooltip)
+	tooltip:Hide()
 	tooltip = nil
 end
 
@@ -484,7 +486,7 @@ function Repair:OnClick(button)
 	else
 		print("|cFF00FF00"..L["Force durability check."])
 		refreshTooltip = 0
-		Repair.OnEnter(anchorTo)
+		--Repair.OnEnter(anchorTo)
 	end
 end
 
