@@ -1,4 +1,4 @@
-## Interface: 70100
+## Interface: 70200
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net, continued by Parnic @ parnic.com
@@ -6,7 +6,7 @@
 ## OptionalDeps: Ace3, LibQTip-1.0
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
-## X-Compatible-With: 60200
+## X-Compatible-With: 70100
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
