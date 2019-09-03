@@ -328,7 +328,10 @@ local AutoRepair = function()
 			end
 		end
 
-		local GuildBankWithdraw = GetGuildBankWithdrawMoney()
+		local GuildBankWithdraw
+		if GetGuildBankWithdrawMoney then
+			GuildBankWithdraw = GetGuildBankWithdrawMoney()
+		end
 		if CanGuildBankRepair() and RepairBrokerDB.guildRepair == 1 and (GuildBankWithdraw == -1 or GuildBankWithdraw >= cost) and not GetGuildInfoText():match("%[noautorepair%]") then
 			Repair:RepairWithGuildBank()
 		else
@@ -494,7 +497,7 @@ Repair.PopupTooltip = function(self)
 	local isGuild = self:GetName():match"Guild"
 	local total
 	local cost = GetRepairAllCost()
-	if not isGuild then
+	if not isGuild or not GetGuildBankWithdrawMoney then
 		total = GetMoney()
 	else
 		total = GetGuildBankWithdrawMoney()
