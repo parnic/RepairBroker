@@ -32,6 +32,7 @@ local GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReact
 local print = function(msg) print("|cFF5555AA"..name..": |cFFAAAAFF"..msg) end
 
 local WowVer = select(4, GetBuildInfo())
+local IsClassic = WOW_PROJECT_ID and WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 -- Stores equipped item info
 local slots = { }
@@ -234,7 +235,9 @@ function Repair:CreateTooltipSkeleton()
 	local factionRepairState=Repair:GetState("OnlyRepairReaction")
 
 	autoRepairLine  = tooltip:AddLine(autoRepairState.color ..L["Toggle auto-repair"],       " ", L["RightMouse"])
-	guildRepairLine = tooltip:AddLine(guildRepairState.color..L["Toggle guild bank-repair"], " ", L["MiddleMouse"])
+	if not IsClassic then
+		guildRepairLine = tooltip:AddLine(guildRepairState.color..L["Toggle guild bank-repair"], " ", L["MiddleMouse"])
+	end
 	factionRepairLine=tooltip:AddLine(factionRepairState.color..L["Reputation requirement: "] .. factionRepairState.status, " ", L["Shift-RightMouse"])
 end
 
@@ -476,7 +479,7 @@ function Repair:OnClick(button)
 				tooltip:SetCell(autoRepairLine, 1, state.color..L["Toggle auto-repair"])
 			end
 		end
-	elseif button == "MiddleButton" or (IsShiftKeyDown() and button == "LeftButton") then
+	elseif guildRepairLine and (button == "MiddleButton" or (IsShiftKeyDown() and button == "LeftButton")) then
 		local state = Repair:SetNextState("guildRepair")
 
 		-- Ex: Guild bank-repair [green]Enable
