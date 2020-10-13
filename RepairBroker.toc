@@ -1,12 +1,12 @@
 ## Interface: 90001
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
-## Author: Merl @ chainwet.net, continued by Parnic @ parnic.com
+## Author: Merl @ chainwet.net, continued by Parnic
 ## Version: @project-version@
 ## OptionalDeps: Ace3, LibQTip-1.0
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
-## X-Compatible-With: 80300
+## X-Compatible-With: 11305
 
 #@no-lib-strip@
 embeds.xml
