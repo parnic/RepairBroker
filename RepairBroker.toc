@@ -1,4 +1,4 @@
-## Interface: 80300
+## Interface: 90001
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net, continued by Parnic @ parnic.com
@@ -6,7 +6,7 @@
 ## OptionalDeps: Ace3, LibQTip-1.0
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
-## X-Compatible-With: 70300
+## X-Compatible-With: 80300
 
 #@no-lib-strip@
 embeds.xml
