@@ -7,6 +7,7 @@
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
 ## X-Compatible-With: 11305
+## X-Curse-Project-ID: 16139
 
 #@no-lib-strip@
 embeds.xml
