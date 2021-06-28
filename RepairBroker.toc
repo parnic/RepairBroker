@@ -1,4 +1,7 @@
-## Interface: 90002
+## Interface: 90100
+## Interface-Retail: 90100
+## Interface-Classic: 11306
+## Interface-BCC: 20501
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net, continued by Parnic
@@ -6,7 +9,6 @@
 ## OptionalDeps: Ace3, LibQTip-1.0
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
-## X-Compatible-With: 11305
 ## X-Curse-Project-ID: 16139
 
 #@no-lib-strip@
