@@ -437,6 +437,10 @@ function Repair:OnEnter()
 end
 
 function Repair:OnLeave()
+	if not tooltip then
+		return
+	end
+
 	LibQTip:Release(tooltip)
 	tooltip:Hide()
 	tooltip = nil
