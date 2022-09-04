@@ -47,3 +47,8 @@ jobs:
         uses: BigWigsMods/packager@master
         with:
           args: -g bcc
+
+      - name: Package and release for TBC
+        uses: BigWigsMods/packager@master
+        with:
+          args: -g wrath
