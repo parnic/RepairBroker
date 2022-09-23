@@ -372,7 +372,7 @@ do -- Hide from the world
 	local f = CreateFrame("Frame")
 	f:RegisterEvent("ADDON_LOADED")
 	f:SetScript("OnEvent", function(_, _, addon)
-		if addon ~= name then return end
+	if addon ~= name then return end
 		Repair.OnLoad()
 		f:SetScript("OnEvent", OnEvent)
 		f:UnregisterEvent("ADDON_LOADED")
