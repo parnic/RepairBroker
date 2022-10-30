@@ -1,0 +1,23 @@
+## Interface: 100000
+## Title: Repair Broker
+## Notes: Auto repair + shows durability.
+## Author: Merl @ chainwet.net, continued by Parnic
+## Version: @project-version@
+## OptionalDeps: Ace3, LibQTip-1.0
+## DefaultState: enabled
+## SavedVariables: RepairBrokerDB
+## X-Curse-Project-ID: 16139
+
+#@no-lib-strip@
+embeds.xml
+#@end-no-lib-strip@
+LibDataBroker-1.1.lua
+
+Locales\enUS.lua
+Locales\zhCN.lua
+Locales\zhTW.lua
+Locales\koKR.lua
+
+tooltip.xml
+popup_10.xml
+RepairBroker.lua
