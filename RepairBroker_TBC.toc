@@ -1,4 +1,4 @@
-## Interface: 30400
+## Interface: 20504
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net, continued by Parnic
