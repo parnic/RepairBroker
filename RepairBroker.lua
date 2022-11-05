@@ -282,6 +282,7 @@ do
 
 		Repair.text = DurabilityText(minDur)
 		Repair.RenderEquippedDurability()
+		Repair.RenderTotalCost()
 		f:SetScript("OnUpdate", nil)
 	end
 
