@@ -26,8 +26,17 @@ local autoRepairLine  = nil
 local guildRepairLine = nil
 local factionRepairLine=nil
 
-local GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReaction
-	= GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReaction
+local GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReaction, GetContainerNumSlots
+	= GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReaction, GetContainerNumSlots
+
+if C_Container then
+	if C_Container.GetContainerItemDurability then
+		GetContainerItemDurability = C_Container.GetContainerItemDurability
+	end
+	if C_Container.GetContainerNumSlots then
+		GetContainerNumSlots = C_Container.GetContainerNumSlots
+	end
+end
 
 local print = function(msg) print("|cFF5555AA"..name..": |cFFAAAAFF"..msg) end
 
