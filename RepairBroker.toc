@@ -22,6 +22,5 @@ Locales\zhCN.lua
 Locales\zhTW.lua
 Locales\koKR.lua
 
-tooltip.xml
 popup_10.xml
 RepairBroker.lua

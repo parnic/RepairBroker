@@ -274,8 +274,16 @@ do
 			-- Update %
 			info[3] = durPerc
 			-- Update cost
-			RepairBrokerScanner:ClearLines()
-			info[4] = select(3, RepairBrokerScanner:SetInventoryItem("player", info[1])) or 0
+			if C_TooltipInfo and C_TooltipInfo.GetInventoryItem then
+				local tooltipData = C_TooltipInfo.GetInventoryItem("player", info[1])
+				if tooltipData then
+					TooltipUtil.SurfaceArgs(tooltipData)
+					info[4] = tooltipData.repairCost and tooltipData.repairCost or 0
+				end
+			else
+				RepairBrokerScanner:ClearLines()
+				info[4] = select(3, RepairBrokerScanner:SetInventoryItem("player", info[1])) or 0
+			end
 
 			-- Add to total cost
 			equippedCost = equippedCost + info[4]
@@ -548,8 +556,17 @@ do
 		while gBag < 5 do
 
 			-- Cost
-			RepairBrokerScanner:ClearLines()
-			local _, repairCost = RepairBrokerScanner:SetBagItem(gBag, gSlot)
+			local _, repairCost
+			if C_TooltipInfo and C_TooltipInfo.GetBagItem then
+				local tooltipData = C_TooltipInfo.GetBagItem(gBag, gSlot)
+				if tooltipData then
+					TooltipUtil.SurfaceArgs(tooltipData)
+					repairCost = tooltipData.repairCost
+				end
+			else
+				RepairBrokerScanner:ClearLines()
+				_, repairCost = RepairBrokerScanner:SetBagItem(gBag, gSlot)
+			end
 
 			if repairCost then cost = cost + repairCost end
 
