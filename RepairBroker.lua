@@ -399,6 +399,10 @@ do -- Hide from the world
 		if event ~= "MERCHANT_SHOW" then
 			Repair.UpdateEquippedDurability()
 			refreshTooltip = 0
+
+			if event == "MERCHANT_CLOSED" then
+				RepairBroker_Popup:Hide()
+			end
 		else
 			AutoRepair()
 			local updateDurTime = GetTime() + 1
