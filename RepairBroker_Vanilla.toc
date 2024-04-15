@@ -1,4 +1,4 @@
-## Interface: 11500
+## Interface: 11502
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net, continued by Parnic
