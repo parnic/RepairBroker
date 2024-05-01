@@ -50,7 +50,13 @@ jobs:
         with:
           args: -g bcc
 
-      - name: Package and release for TBC
+      - name: Package and release for Wrath
         uses: BigWigsMods/packager@v2
         with:
           args: -g wrath
+
+      - name: Package and release for Cataclysm
+        uses: BigWigsMods/packager@v2
+        with:
+          args: -g cata
+  
