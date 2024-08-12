@@ -26,6 +26,8 @@ local autoRepairLine  = nil
 local guildRepairLine = nil
 local factionRepairLine=nil
 
+local optionsFrame = {}
+
 local GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReaction, GetContainerNumSlots
 	= GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReaction, GetContainerNumSlots
 
@@ -151,23 +153,145 @@ function Repair:OnLoad()
 	-- Register @ LibBrokers
 	Repair = LibDataBroker:NewDataObject(name, Repair)
 	RepairBroker = Repair -- Register globaly
+
+	LibStub("AceConfig-3.0"):RegisterOptionsTable(L["RepairBroker"], Repair:GetOptions(), "repairbroker")
+	optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["RepairBroker"])
+end
+
+function Repair:GetOptions()
+	local opts = {
+		name = L["RepairBroker"],
+		type = "group",
+		args = {
+			mainSettings = {
+				name = L["Settings"],
+				type = "group",
+				order = 1,
+				args = {
+					durabilityColorMax = {
+						type = "color",
+						name = L["Max durability color"],
+						desc = L["The color to show for items that are at 100% durability."],
+						get = function(info)
+							local color = RepairBrokerDB["durabilityColorMax"] or {R = nil, G = nil, B = nil}
+							return color.R or 0x0, color.G or 1.0 * 0x55 / 255, color.B or 0x0
+						end,
+						set = function(info, r, g, b)
+							local color = {R = r, G = g, B = b}
+							RepairBrokerDB["durabilityColorMax"] = color
+							Repair:UpdateEquippedDurability()
+						end,
+						order = 1
+					},
+					durabilityColorHigh = {
+						type = "color",
+						name = L["High durability color"],
+						desc = L["The color to show for items that are at 90%-99% durability."],
+						get = function(info)
+							local color = RepairBrokerDB["durabilityColorHigh"] or {R = nil, G = nil, B = nil}
+							return color.R or 0x0, color.G or 1.0 * 0xAA / 255, color.B or 0x0
+						end,
+						set = function(info, r, g, b)
+							local color = {R = r, G = g, B = b}
+							RepairBrokerDB["durabilityColorHigh"] = color
+							Repair:UpdateEquippedDurability()
+						end,
+						order = 2
+					},
+					durabilityColorMed = {
+						type = "color",
+						name = L["Medium durability color"],
+						desc = L["The color to show for items that are at 51%-89% durability."],
+						get = function(info)
+							local color = RepairBrokerDB["durabilityColorMed"] or {R = nil, G = nil, B = nil}
+							return color.R or 1.0 * 0xFF / 255, color.G or 1.0 * 0xFF / 255, color.B or 0x0
+						end,
+						set = function(info, r, g, b)
+							local color = {R = r, G = g, B = b}
+							RepairBrokerDB["durabilityColorMed"] = color
+							Repair:UpdateEquippedDurability()
+						end,
+						order = 3
+					},
+					durabilityColorLow = {
+						type = "color",
+						name = L["Low durability color"],
+						desc = L["The color to show for items that are at 21%-50% durability."],
+						get = function(info)
+							local color = RepairBrokerDB["durabilityColorLow"] or {R = nil, G = nil, B = nil}
+							return color.R or 1.0 * 0xFF / 255, color.G or 1.0 * 0x99 / 255, color.B or 0x0
+						end,
+						set = function(info, r, g, b)
+							local color = {R = r, G = g, B = b}
+							RepairBrokerDB["durabilityColorLow"] = color
+							Repair:UpdateEquippedDurability()
+						end,
+						order = 4
+					},
+					durabilityColorBroken = {
+						type = "color",
+						name = L["Broken durability color"],
+						desc = L["The color to show for items that are at 0%-20% durability."],
+						get = function(info)
+							local color = RepairBrokerDB["durabilityColorBroken"] or {R = nil, G = nil, B = nil}
+							return color.R or 1.0 * 0xFF / 255, color.G or 0x0, color.B or 0x0
+						end,
+						set = function(info, r, g, b)
+							local color = {R = r, G = g, B = b}
+							RepairBrokerDB["durabilityColorBroken"] = color
+							Repair:UpdateEquippedDurability()
+						end,
+						order = 5
+					},
+				},
+			},
+			reset = {
+				name = L["Reset"],
+				type = "group",
+				order = 2,
+				args = {
+					resetToDefaults = {
+						type = 'execute',
+						name = L["Reset to defaults"],
+						desc = L["Resets all settings to defaults."],
+						func = function(info)
+							RepairBrokerDB["durabilityColorMax"] = nil
+							RepairBrokerDB["durabilityColorHigh"] = nil
+							RepairBrokerDB["durabilityColorMed"] = nil
+							RepairBrokerDB["durabilityColorLow"] = nil
+							RepairBrokerDB["durabilityColorBroken"] = nil
+							Repair:UpdateEquippedDurability()
+						end,
+						order = 1,
+					},
+				},
+			},
+		},
+	}
+
+	return opts
 end
 
 ---------------------------------
 -- Support functions
 ---------------------------------
+local FormatColor = function(settingName, fallbackColor)
+	local color = RepairBrokerDB[settingName]
+	return color and string.format("|cFF%02X%02X%02X", color.R * 255, color.G * 255, color.B * 255) or fallbackColor
+end
+
 local DurabilityColor = function(perc)
 	if not perc or perc < 0 then return "|cFF555555" end
 	if perc == 1 then
-		return "|cFF005500" -- Dark green
+		return FormatColor("durabilityColorMax", "|cFF005500") -- Dark green
 	elseif perc >= .9 then
-		return "|cFF00AA00" -- Green
+		return FormatColor("durabilityColorHigh", "|cFF00AA00") -- Green
 	elseif perc > .5 then
-		return "|cFFFFFF00" -- Yellow
+		return FormatColor("durabilityColorMed", "|cFFFFFF00") -- Yellow
 	elseif perc > .2 then
-		return "|cFFFF9900" -- Orange
+		return FormatColor("durabilityColorLow", "|cFFFF9900") -- Orange
 	else
-		return "|cFFFF0000" -- Red
+		return FormatColor("durabilityColorBroken", "|cFFFF0000") -- Red
 	end
 end
 
@@ -248,6 +372,8 @@ function Repair:CreateTooltipSkeleton()
 		guildRepairLine = tooltip:AddLine(guildRepairState.color..L["Toggle guild bank-repair"], " ", L["MiddleMouse"])
 	end
 	factionRepairLine=tooltip:AddLine(factionRepairState.color..L["Reputation requirement: "] .. factionRepairState.status, " ", L["Shift-RightMouse"])
+
+	tooltip:AddLine(textColor..L["Open settings"], " ", L["Shift-LeftMouse"])
 end
 
 do
@@ -505,7 +631,7 @@ function Repair:OnClick(button)
 				tooltip:SetCell(autoRepairLine, 1, state.color..L["Toggle auto-repair"])
 			end
 		end
-	elseif guildRepairLine and (button == "MiddleButton" or (IsShiftKeyDown() and button == "LeftButton")) then
+	elseif guildRepairLine and button == "MiddleButton" then
 		local state = Repair:SetNextState("guildRepair")
 
 		-- Ex: Guild bank-repair [green]Enable
@@ -516,9 +642,17 @@ function Repair:OnClick(button)
 			tooltip:SetCell(guildRepairLine, 1, state.color..L["Toggle guild bank-repair"])
 		end
 	else
-		print("|cFF00FF00"..L["Force durability check."])
-		refreshTooltip = 0
-		--Repair.OnEnter(anchorTo)
+		if IsShiftKeyDown() then
+			if InterfaceOptionsFrame_OpenToCategory then
+				InterfaceOptionsFrame_OpenToCategory(optionsFrame)
+			else
+				Settings.OpenToCategory(L["RepairBroker"])
+			end
+		else
+			print("|cFF00FF00"..L["Force durability check."])
+			refreshTooltip = 0
+			--Repair.OnEnter(anchorTo)
+		end
 	end
 end
 
