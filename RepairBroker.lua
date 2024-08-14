@@ -403,7 +403,9 @@ do
 			if C_TooltipInfo and C_TooltipInfo.GetInventoryItem then
 				local tooltipData = C_TooltipInfo.GetInventoryItem("player", info[1])
 				if tooltipData then
-					TooltipUtil.SurfaceArgs(tooltipData)
+					if TooltipUtil and TooltipUtil.SurfaceArgs then
+						TooltipUtil.SurfaceArgs(tooltipData)
+					end
 					info[4] = tooltipData.repairCost and tooltipData.repairCost or 0
 				end
 			else
@@ -694,7 +696,9 @@ do
 			if C_TooltipInfo and C_TooltipInfo.GetBagItem then
 				local tooltipData = C_TooltipInfo.GetBagItem(gBag, gSlot)
 				if tooltipData then
-					TooltipUtil.SurfaceArgs(tooltipData)
+					if TooltipUtil and TooltipUtil.SurfaceArgs then
+						TooltipUtil.SurfaceArgs(tooltipData)
+					end
 					repairCost = tooltipData.repairCost
 				end
 			else
