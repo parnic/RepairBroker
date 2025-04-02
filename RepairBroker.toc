@@ -1,6 +1,6 @@
-## Interface: 110007
-## Interface-Retail: 110007
-## Interface-Classic: 11506
+## Interface: 110100
+## Interface-Retail: 110100
+## Interface-Classic: 11507
 ## Interface-BCC: 20504
 ## Interface-Wrath: 30403
 ## Interface-Cata: 40402
@@ -13,6 +13,17 @@
 ## SavedVariables: RepairBrokerDB
 ## IconTexture: Interface\Icons\Trade_BlackSmithing
 ## X-Curse-Project-ID: 16139
+## Category-enUS: Data Broker
+## Category-deDE: Datenbroker
+## Category-esES: Intermediario de Datos
+## Category-esMX: Intermediario de Datos
+## Category-frFR: Courtier de Données
+## Category-itIT:
+## Category-koKR:
+## Category-ptBR: Corretor de Dados
+## Category-ruRU: Посредник данных
+## Category-zhCN: 数据管理
+## Category-zhTW: 資料管理
 
 #@no-lib-strip@
 embeds.xml
