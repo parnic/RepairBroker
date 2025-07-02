@@ -1,10 +1,4 @@
-## Interface: 110107
-## Interface-Retail: 110107
-## Interface-Classic: 11507
-## Interface-BCC: 20504
-## Interface-Wrath: 30403
-## Interface-Cata: 40402
-## Interface-Mists: 50500
+## Interface: 50500
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net, continued by Parnic
@@ -12,7 +6,6 @@
 ## OptionalDeps: Ace3, LibQTip-1.0
 ## DefaultState: enabled
 ## SavedVariables: RepairBrokerDB
-## IconTexture: Interface\Icons\Trade_BlackSmithing
 ## X-Curse-Project-ID: 16139
 ## Category-enUS: Data Broker
 ## Category-deDE: Datenbroker
@@ -36,5 +29,6 @@ Locales\zhCN.lua
 Locales\zhTW.lua
 Locales\koKR.lua
 
+tooltip.xml
 popup_10.xml
 RepairBroker.lua

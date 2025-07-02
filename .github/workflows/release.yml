@@ -59,4 +59,9 @@ jobs:
         uses: BigWigsMods/packager@v2
         with:
           args: -g cata
+
+      - name: Package and release for Mists
+        uses: BigWigsMods/packager@v2
+        with:
+          args: -g mists
   
