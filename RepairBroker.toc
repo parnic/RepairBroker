@@ -4,7 +4,7 @@
 ## Interface-BCC: 20504
 ## Interface-Wrath: 30405
 ## Interface-Cata: 40402
-## Interface-Mists: 50502
+## Interface-Mists: 50503
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net, continued by Parnic
