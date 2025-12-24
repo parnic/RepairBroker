@@ -27,6 +27,7 @@ local guildRepairLine = nil
 local factionRepairLine=nil
 
 local optionsFrame = {}
+local settingsCategoryID
 
 local GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReaction, GetContainerNumSlots
 	= GetInventorySlotInfo, GetContainerItemDurability, ipairs, print, UnitReaction, GetContainerNumSlots
@@ -155,7 +156,7 @@ function Repair:OnLoad()
 	RepairBroker = Repair -- Register globaly
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable(L["RepairBroker"], Repair:GetOptions(), "repairbroker")
-	optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["RepairBroker"])
+	optionsFrame, settingsCategoryID = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["RepairBroker"])
 end
 
 function Repair:GetOptions()
@@ -648,7 +649,7 @@ function Repair:OnClick(button)
 			if InterfaceOptionsFrame_OpenToCategory then
 				InterfaceOptionsFrame_OpenToCategory(optionsFrame)
 			else
-				Settings.OpenToCategory(L["RepairBroker"])
+				Settings.OpenToCategory(settingsCategoryID)
 			end
 		else
 			print("|cFF00FF00"..L["Force durability check."])
