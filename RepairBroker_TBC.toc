@@ -1,4 +1,4 @@
-## Interface: 20504
+## Interface: 20505
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net, continued by Parnic
@@ -30,5 +30,5 @@ Locales\zhTW.lua
 Locales\koKR.lua
 
 tooltip.xml
-popup.xml
+popup_10.xml
 RepairBroker.lua
