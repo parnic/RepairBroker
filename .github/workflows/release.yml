@@ -30,38 +30,10 @@ jobs:
 
       # we first have to clone the AddOn project, this is a required step
       - name: Clone project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       # once cloned, we just run the GitHub Action for the packager project
       - name: Package and release
         uses: BigWigsMods/packager@v2
-
-      # another example where we supply additional arguments, this example is specifically to release
-      # for the Classic version of the game
-      - name: Package and release for Classic
-        uses: BigWigsMods/packager@v2
-        with:
-          args: -g classic
-      
-      - name: Package and release for TBC
-        uses: BigWigsMods/packager@v2
-        with:
-          args: -g bcc
-
-      - name: Package and release for Wrath
-        uses: BigWigsMods/packager@v2
-        with:
-          args: -g wrath
-
-      - name: Package and release for Cataclysm
-        uses: BigWigsMods/packager@v2
-        with:
-          args: -g cata
-
-      - name: Package and release for Mists
-        uses: BigWigsMods/packager@v2
-        with:
-          args: -g mists
-  
