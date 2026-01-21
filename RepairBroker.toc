@@ -31,6 +31,7 @@ Locales\ruRU.lua
 Locales\zhCN.lua
 Locales\zhTW.lua
 
+tooltip.xml
 popup_10.xml [AllowLoadGameType mainline, mists, cata, tbc, vanilla]
 popup.xml [AllowLoadGameType wrath]
 RepairBroker.lua
