@@ -1,4 +1,4 @@
-## Interface: 11508, 20505, 30405, 38000, 40402, 50503, 120000, 120001
+## Interface: 11508, 20505, 38000, 50503, 120000, 120001
 ## Title: Repair Broker
 ## Notes: Auto repair + shows durability.
 ## Author: Merl @ chainwet.net, continued by Parnic
